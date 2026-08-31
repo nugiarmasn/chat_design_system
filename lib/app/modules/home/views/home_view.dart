@@ -4,6 +4,7 @@ import '../controllers/home_controller.dart';
 import '../../../pages/bars_navigation/nav_bars_page.dart';
 import '../../../pages/bars_navigation/bottom_and_tabs_page.dart';
 import '../../../pages/bars_navigation/search_bars_page.dart';
+import '../../text_fields/views/text_fields_view.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -13,6 +14,8 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildContent(int index, String menuTitle) {
     switch (index) {
+      case 1: // Controls / Text Fields
+        return const TextFieldsView();
       case 3: // Bars / Nav Bars
         return const NavBarsPage();
       case 4: // Navigation / Bottom & Tabs
@@ -95,8 +98,7 @@ class HomeView extends GetView<HomeController> {
                       selectedTileColor: Colors.blue.withOpacity(0.1),
                       onTap: () {
                         controller.changeMenu(index);
-                        if (isDrawer)
-                          Navigator.of(context).pop(); // tutup drawer
+                        if (isDrawer) Navigator.of(context).pop(); // tutup drawer
                       },
                     );
                   },
