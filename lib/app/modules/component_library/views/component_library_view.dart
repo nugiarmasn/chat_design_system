@@ -1,48 +1,88 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/home_controller.dart';
-import '../../../pages/bars_navigation/nav_bars_page.dart';
-import '../../../pages/bars_navigation/bottom_and_tabs_page.dart';
-import '../../../pages/bars_navigation/search_bars_page.dart';
-import '../../text_fields/views/text_fields_view.dart';
+import '../controllers/component_library_controller.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../widgets/custom_avatar.dart';
-import '../../../widgets/chat_list_tile.dart';
-import '../../../widgets/chat_input_field.dart';
+import '../../../widgets/chat_list_item.dart'; // Tetap dipertahankan kalau masih dipakai di tempat lain
+import '../../../widgets/chat_list_tile.dart'; // Import komponen baru
+import '../../../widgets/chat_input_field.dart'; // Import komponen input chat
+import '../../../widgets/message_composer.dart';
 
-class HomeView extends GetView<HomeController> {
-  const HomeView({super.key});
+class ComponentLibraryView extends GetView<ComponentLibraryController> {
+  const ComponentLibraryView({super.key});
 
-  // Breakpoint: di bawah lebar ini, sidebar disembunyikan jadi Drawer.
-  static const double _mobileBreakpoint = 700;
-
-  Widget _buildContent(int index, String menuTitle) {
-    switch (index) {
-      case 1: // Controls / Text Fields
-        return const TextFieldsView();
-      case 3: // Bars / Nav Bars
-        return const NavBarsPage();
-      case 4: // Navigation / Bottom & Tabs
-        return const BottomAndTabsPage();
-      case 5: // Bars / Search Bars
-        return const SearchBarsPage();
-      case 9: // Lists / Chat & Users
-        return _buildChatListContent();
-      case 10: // Message Area
-        return _buildMessageComposerContent();
-      case 11: // Views / Avatars & Badges
-        return _buildAvatarsContent();
-      default:
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Halaman $menuTitle akan dirender di sini.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
-            ),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
+      appBar: AppBar(
+        title: const Text('Component Library', style: TextStyle(fontFamily: AppTypography.fontFamily)),
+        centerTitle: true,
+        backgroundColor: AppColors.surfaceWhite,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: AppColors.divider, height: 1.0),
+        ),
+      ),
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Sidebar
+          Container(
+            width: 250,
+            color: AppColors.surfaceWhite,
+            child: Obx(() {
+              // Panggil .value secara langsung di dalam block Obx 
+              // agar GetX bisa mendeteksi dependency sebelum render builder ListView
+              final selectedValue = controller.selectedMenu.value;
+              
+              return ListView.separated(
+                itemCount: controller.menuItems.length,
+                separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.divider),
+                itemBuilder: (context, index) {
+                  final item = controller.menuItems[index];
+                  final isSelected = item == selectedValue;
+                  return ListTile(
+                    title: Text(
+                      item,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: isSelected ? AppColors.primaryBlue : AppColors.textPrimary,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    selected: isSelected,
+                    selectedTileColor: AppColors.primaryBlueLight, // Menggunakan warna highlight terang
+                    onTap: () => controller.selectMenu(item),
+                  );
+                },
+              );
+            }),
           ),
-        );
+          const VerticalDivider(width: 1, thickness: 1, color: AppColors.divider),
+          
+          // Content Area
+          Expanded(
+            child: Obx(() {
+              return _buildContent(controller.selectedMenu.value);
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(String selectedMenu) {
+    switch (selectedMenu) {
+      case 'Views / Avatars':
+        return _buildAvatarsContent();
+      case 'Lists / Chat & Users':
+        return _buildChatListContent();
+      case 'Forms / Message Area':
+        return _buildMessageComposerContent();
+      default:
+        return const Center(child: Text('Select a component'));
     }
   }
 
@@ -77,6 +117,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  /// Helper untuk merender variasi ukuran dan bentuk dari satu tipe konten avatar
   Widget _buildAvatarGrid({
     String? initials,
     IconData? defaultIcon,
@@ -84,6 +125,7 @@ class HomeView extends GetView<HomeController> {
     AvatarBadgeType badgeType = AvatarBadgeType.none,
     int notificationCount = 0,
   }) {
+    // Membalik ukuran agar yang terbesar (xxxl) tampil lebih dulu
     final sizes = AvatarSize.values.reversed.toList();
     
     return Wrap(
@@ -278,120 +320,6 @@ class HomeView extends GetView<HomeController> {
           const SizedBox(height: AppSpacing.xxl),
         ],
       ),
-    );
-  }
-
-  Widget _sidebarContent(BuildContext context, {required bool isDrawer}) {
-    return Container(
-      width: isDrawer ? null : 280,
-      color: const Color(0xFFF4F5F7),
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 16.0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Flexible(
-                    child: Text(
-                      'Component Library',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Obx(
-                    () => IconButton(
-                      icon: Icon(
-                        controller.isDarkMode.value
-                            ? Icons.dark_mode
-                            : Icons.light_mode,
-                      ),
-                      tooltip: 'Toggle Light/Dark Mode',
-                      onPressed: controller.toggleTheme,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Obx(() {
-                final selected = controller.selectedIndex.value;
-                return ListView.builder(
-                  itemCount: controller.menus.length,
-                  itemBuilder: (context, index) {
-                    final isSelected = selected == index;
-                    return ListTile(
-                      title: Text(
-                        controller.menus[index],
-                        style: TextStyle(
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          color: isSelected
-                              ? const Color(0xFF0052CC)
-                              : Colors.black87,
-                        ),
-                      ),
-                      selected: isSelected,
-                      selectedTileColor: Colors.blue.withOpacity(0.1),
-                      onTap: () {
-                        controller.changeMenu(index);
-                        if (isDrawer) Navigator.of(context).pop(); // tutup drawer
-                      },
-                    );
-                  },
-                );
-              }),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isMobile = constraints.maxWidth < _mobileBreakpoint;
-
-        final contentArea = Obx(() {
-          final index = controller.selectedIndex.value;
-          final title = controller.menus[index];
-          return _buildContent(index, title);
-        });
-
-        if (isMobile) {
-          // Layar sempit: sidebar jadi Drawer, ada AppBar dengan tombol menu.
-          return Scaffold(
-            appBar: AppBar(
-              title: Obx(
-                () => Text(controller.menus[controller.selectedIndex.value]),
-              ),
-            ),
-            drawer: Drawer(child: _sidebarContent(context, isDrawer: true)),
-            body: contentArea,
-          );
-        }
-
-        // Layar lebar: sidebar permanen di kiri.
-        return Scaffold(
-          body: Row(
-            children: [
-              _sidebarContent(context, isDrawer: false),
-              const VerticalDivider(thickness: 1, width: 1),
-              Expanded(child: contentArea),
-            ],
-          ),
-        );
-      },
     );
   }
 }
