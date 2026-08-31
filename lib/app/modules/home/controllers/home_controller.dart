@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
@@ -20,5 +21,13 @@ class HomeController extends GetxController {
 
   void changeMenu(int index) {
     selectedIndex.value = index;
+  }
+
+  // ===== Theme (Light/Dark) global =====
+  final isDarkMode = false.obs;
+
+  void toggleTheme() {
+    isDarkMode.value = !isDarkMode.value;
+    Get.changeThemeMode(isDarkMode.value ? ThemeMode.dark : ThemeMode.light);
   }
 }
