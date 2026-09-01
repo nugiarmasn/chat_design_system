@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/text_fields_controller.dart';
 import '../../../components/custom_textfield.dart';
-import '../../../core/app_theme.dart';
+import '../../../core/theme/app_theme.dart';
 
 class TextFieldsView extends GetView<TextFieldsController> {
   const TextFieldsView({super.key});
@@ -10,11 +10,11 @@ class TextFieldsView extends GetView<TextFieldsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.appBackground,
       body: ListView(
         padding: const EdgeInsets.all(32),
         children: [
-          Text('Text Fields', style: AppTextStyles.heading),
+          Text('Text Fields', style: AppTextStyles.heading.adapt(context)),
           const SizedBox(height: 32),
 
           const CustomTextField(

@@ -16,7 +16,7 @@ class ComponentLibraryView extends GetView<ComponentLibraryController> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text('Component Library', style: TextStyle(fontFamily: AppTypography.fontFamily)),
+        title: Text('Component Library', style: TextStyle(fontFamily: AppTypography.fontFamily)),
         centerTitle: true,
         backgroundColor: AppColors.surfaceWhite,
         foregroundColor: AppColors.textPrimary,
