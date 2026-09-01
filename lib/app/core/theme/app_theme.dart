@@ -7,6 +7,7 @@ class AppColors {
   static const Color primaryBlue = Color(0xFF007AFF);
   static const Color primaryBlueLight = Color(0xFFE5F1FF);
   static const Color primaryPurple = Color(0xFFA5A6F6); // Added for avatars
+  static const Color deepPurple = Color(0xFF6200EA); // Added for Message Composer send button/voice icon
 
   // Neutral / Background Colors
   static const Color backgroundLight = Color(0xFFF7F7F9);
