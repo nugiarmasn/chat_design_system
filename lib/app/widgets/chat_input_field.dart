@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../core/theme/app_theme.dart';
 import 'custom_avatar.dart';
 
@@ -103,7 +104,7 @@ class ChatInputField extends StatelessWidget {
                 Text(
                   u['name'] as String,
                   style: AppTypography.bodyMedium.copyWith(
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    fontWeight: FontWeight.bold,
                   ).adapt(context),
                 ),
               ],
@@ -128,7 +129,7 @@ class ChatInputField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Edit Message', style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600).adapt(context)),
+          Text('Edit Message', style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold).adapt(context)),
           Text('Previous message', style: AppTypography.caption),
         ],
       ),
@@ -169,7 +170,7 @@ class ChatInputField extends StatelessWidget {
               text.isEmpty ? hint : text,
               style: text.isEmpty 
                   ? AppTypography.bodySecondary.adapt(context)
-                  : AppTypography.body.adapt(context),
+                  : AppTypography.body.copyWith(fontWeight: FontWeight.w600).adapt(context),
             ),
     );
   }
@@ -214,13 +215,15 @@ class ChatInputField extends StatelessWidget {
 
 class IconAction extends StatelessWidget {
   final IconData icon;
-  const IconAction({super.key, required this.icon});
+  final Color? color;
+  final double? size;
+  const IconAction({super.key, required this.icon, this.color, this.size});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Icon(icon, color: context.appTextSecondary, size: 24),
+      child: Icon(icon, color: color ?? context.appTextSecondary, size: size ?? 24),
     );
   }
 }
@@ -410,20 +413,95 @@ class PopupAttachment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildPopupContainer(
-      context: context,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildPopupContainer(
+          context: context,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildMenuItem(context, CupertinoIcons.camera_fill, 'Camera'),
+                _buildMenuItem(context, CupertinoIcons.photo_fill, 'Attach Image'),
+                _buildMenuItem(context, CupertinoIcons.video_camera_solid, 'Attach Video'),
+                _buildMenuItem(context, CupertinoIcons.play_circle_fill, 'Attach Audio'),
+                _buildMenuItem(context, CupertinoIcons.doc_fill, 'Attach Document'),
+                _buildMenuItem(context, Icons.menu, 'Poll'),
+                _buildWhiteboardMenuItem(context),
+                _buildMenuItem(context, Icons.edit_document, 'Collaborative Document'),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Container(
+          decoration: BoxDecoration(
+            color: context.appSurface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: context.appDivider),
+          ),
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(4.0),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF130C88),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close, color: Colors.white, size: 20),
+                      ),
+                    ),
+                    const IconAction(icon: CupertinoIcons.mic),
+                    const IconAction(icon: CupertinoIcons.smiley),
+                    const IconAction(icon: CupertinoIcons.doc),
+                    const IconAction(icon: CupertinoIcons.sparkles),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: context.appDivider,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.send, color: AppColors.textTertiary, size: 20),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWhiteboardMenuItem(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 12, top: 8, bottom: 8),
+      child: Row(
         children: [
-          _buildMenuItem(context, Icons.camera_alt, 'Camera'),
-          _buildMenuItem(context, Icons.image, 'Attach Image'),
-          _buildMenuItem(context, Icons.videocam, 'Attach Video'),
-          _buildMenuItem(context, Icons.audiotrack, 'Attach Audio'),
-          _buildMenuItem(context, Icons.description, 'Attach Document'),
-          Divider(height: 1, color: context.appDivider),
-          _buildMenuItem(context, Icons.poll, 'Poll'),
-          _buildMenuItem(context, Icons.brush, 'Collaborative Whiteboard'),
-          _buildMenuItem(context, Icons.article, 'Collaborative Document'),
+          Container(
+            width: 26,
+            height: 26,
+            decoration: BoxDecoration(
+              color: const Color(0xFF130C88),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Center(
+              child: Icon(Icons.gesture, color: Colors.white, size: 18),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text('Collaborative Whiteboard', style: AppTypography.bodyMedium.copyWith(fontSize: 16, fontWeight: FontWeight.w500).adapt(context)),
         ],
       ),
     );
@@ -431,12 +509,12 @@ class PopupAttachment extends StatelessWidget {
 
   Widget _buildMenuItem(BuildContext context, IconData icon, String label) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      padding: const EdgeInsets.only(left: 16, right: 12, top: 8, bottom: 8),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.deepPurple, size: 20),
-          const SizedBox(width: AppSpacing.md),
-          Text(label, style: AppTypography.bodyMedium.adapt(context)),
+          Icon(icon, color: const Color(0xFF130C88), size: 26),
+          const SizedBox(width: 8),
+          Text(label, style: AppTypography.bodyMedium.copyWith(fontSize: 16, fontWeight: FontWeight.w500).adapt(context)),
         ],
       ),
     );
