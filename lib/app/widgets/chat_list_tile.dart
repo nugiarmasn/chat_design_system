@@ -47,7 +47,7 @@ class ChatListTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // 1. Sisi Kiri: Foto profil / Avatar
-            _buildAvatar(),
+            _buildAvatar(context),
             const SizedBox(width: AppSpacing.md),
             
             // 2. Sisi Tengah: Nama User dan Cuplikan Pesan
@@ -60,12 +60,12 @@ class ChatListTile extends StatelessWidget {
                     name,
                     style: AppTypography.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
-                    ),
+                    ).adapt(context),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: AppSpacing.xs),
-                  _buildMessageSnippet(),
+                  _buildMessageSnippet(context),
                 ],
               ),
             ),
@@ -78,7 +78,7 @@ class ChatListTile extends StatelessWidget {
               children: [
                 Text(
                   time,
-                  style: AppTypography.timeLabel,
+                  style: AppTypography.timeLabel.adapt(context),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 _buildReadStatusIcon(),
@@ -91,7 +91,7 @@ class ChatListTile extends StatelessWidget {
   }
 
   /// Membuat widget avatar berdasarkan inisial atau icon
-  Widget _buildAvatar() {
+  Widget _buildAvatar(BuildContext context) {
     return CircleAvatar(
       radius: 24,
       backgroundColor: AppColors.primaryPurple,
@@ -108,36 +108,36 @@ class ChatListTile extends StatelessWidget {
   }
 
   /// Membuat widget baris untuk cuplikan pesan dengan icon attachment jika ada
-  Widget _buildMessageSnippet() {
+  Widget _buildMessageSnippet(BuildContext context) {
     return Row(
       children: [
         if (senderPrefix != null) ...[
           Text(
             senderPrefix!,
             style: AppTypography.bodySecondary.copyWith(
-              color: AppColors.textPrimary,
+              color: context.appTextPrimary,
               fontWeight: FontWeight.w500,
             ),
           ),
         ],
         if (hasAttachment) ...[
-          const Icon(
+          Icon(
             Icons.image,
             size: 14,
-            color: AppColors.textSecondary,
+            color: context.appTextSecondary,
           ),
           const SizedBox(width: 4),
           Text(
             'Photo ',
             style: AppTypography.bodySecondary.copyWith(
               fontWeight: FontWeight.w500,
-            ),
+            ).adapt(context),
           ),
         ],
         Expanded(
           child: Text(
             messageSnippet,
-            style: AppTypography.bodySecondary,
+            style: AppTypography.bodySecondary.adapt(context),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

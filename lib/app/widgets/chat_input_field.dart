@@ -32,29 +32,30 @@ class ChatInputField extends StatelessWidget {
         ],
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surfaceWhite,
+            color: context.appSurface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDivider),
           ),
           child: state == ChatInputState.recording
               ? const VoiceNoteRecorder()
-              : _buildNormalInput(),
+              : _buildNormalInput(context),
         ),
       ],
     );
   }
 
   /// Membuat UI kotak input normal dengan textfield dan action icons
-  Widget _buildNormalInput() {
+  Widget _buildNormalInput(BuildContext context) {
     return Column(
       children: [
         TextField(
           controller: initialText != null ? TextEditingController(text: initialText) : null,
-          decoration: const InputDecoration(
+          style: AppTypography.body.adapt(context),
+          decoration: InputDecoration(
             hintText: 'Type your message...',
-            hintStyle: AppTypography.bodySecondary,
+            hintStyle: AppTypography.bodySecondary.adapt(context),
             border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(
+            contentPadding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
               vertical: AppSpacing.sm,
             ),
@@ -71,22 +72,22 @@ class ChatInputField extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.add_circle_outline),
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondary,
                     onPressed: () {},
                   ),
                   IconButton(
                     icon: const Icon(Icons.mic_none),
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondary,
                     onPressed: () {},
                   ),
                   IconButton(
                     icon: const Icon(Icons.emoji_emotions_outlined),
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondary,
                     onPressed: () {},
                   ),
                   IconButton(
                     icon: const Icon(Icons.auto_awesome),
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondary,
                     onPressed: () {},
                   ),
                 ],
@@ -120,9 +121,9 @@ class VoiceNoteRecorder extends StatelessWidget {
             child: const Icon(Icons.mic, size: 32, color: AppColors.primaryPurple),
           ),
           const SizedBox(height: AppSpacing.md),
-          const Text(
+          Text(
             '00:00:10',
-            style: AppTypography.bodyMedium,
+            style: AppTypography.bodyMedium.adapt(context),
           ),
           const SizedBox(height: AppSpacing.lg),
           Row(
@@ -130,7 +131,7 @@ class VoiceNoteRecorder extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.delete_outline),
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
                 onPressed: () {},
               ),
               const SizedBox(width: AppSpacing.lg),
@@ -141,7 +142,7 @@ class VoiceNoteRecorder extends StatelessWidget {
               const SizedBox(width: AppSpacing.lg),
               IconButton(
                 icon: const Icon(Icons.stop),
-                color: AppColors.textSecondary,
+                color: context.appTextSecondary,
                 onPressed: () {},
               ),
             ],
@@ -161,12 +162,12 @@ class AttachmentPopupMenu extends StatelessWidget {
     return Container(
       width: 280, // Ukuran popup statis untuk demo
       decoration: BoxDecoration(
-        color: AppColors.surfaceWhite,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(context.isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -175,25 +176,25 @@ class AttachmentPopupMenu extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildItem(Icons.camera_alt, 'Camera'),
-          _buildItem(Icons.image, 'Attach Image'),
-          _buildItem(Icons.videocam, 'Attach Video'),
-          _buildItem(Icons.audiotrack, 'Attach Audio'),
-          _buildItem(Icons.description, 'Attach Document'),
-          const Divider(height: 1, color: AppColors.divider),
-          _buildItem(Icons.poll, 'Poll'),
-          _buildItem(Icons.brush, 'Collaborative Whiteboard'),
-          _buildItem(Icons.article, 'Collaborative Document'),
+          _buildItem(context, Icons.camera_alt, 'Camera'),
+          _buildItem(context, Icons.image, 'Attach Image'),
+          _buildItem(context, Icons.videocam, 'Attach Video'),
+          _buildItem(context, Icons.audiotrack, 'Attach Audio'),
+          _buildItem(context, Icons.description, 'Attach Document'),
+          Divider(height: 1, color: context.appDivider),
+          _buildItem(context, Icons.poll, 'Poll'),
+          _buildItem(context, Icons.brush, 'Collaborative Whiteboard'),
+          _buildItem(context, Icons.article, 'Collaborative Document'),
         ],
       ),
     );
   }
 
   /// Membuat baris item menu di popup
-  Widget _buildItem(IconData icon, String label) {
+  Widget _buildItem(BuildContext context, IconData icon, String label) {
     return ListTile(
       leading: Icon(icon, color: AppColors.primaryBlue),
-      title: Text(label, style: AppTypography.bodyMedium),
+      title: Text(label, style: AppTypography.bodyMedium.adapt(context)),
       dense: true,
       onTap: () {},
     );
@@ -217,9 +218,9 @@ class ActionSummaryBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceWhite,
+        color: context.appSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDivider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,24 +240,24 @@ class ActionSummaryBox extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+                    style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold).adapt(context),
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, size: 20),
-                  color: AppColors.textSecondary,
+                  color: context.appTextSecondary,
                   onPressed: () {},
                 ),
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.appDivider),
           // Bagian Konten Teks
           Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Text(
               content,
-              style: AppTypography.bodySecondary,
+              style: AppTypography.bodySecondary.adapt(context),
             ),
           ),
         ],

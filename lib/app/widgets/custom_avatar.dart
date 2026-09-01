@@ -83,7 +83,7 @@ class CustomAvatar extends StatelessWidget {
           _buildBaseAvatar(),
           
           // Badge Overlay
-          if (badgeType != AvatarBadgeType.none) _buildBadge(),
+          if (badgeType != AvatarBadgeType.none) _buildBadge(context),
         ],
       ),
     );
@@ -149,7 +149,7 @@ class CustomAvatar extends StatelessWidget {
   }
 
   /// Membuat badge di pojok kanan bawah
-  Widget _buildBadge() {
+  Widget _buildBadge(BuildContext context) {
     final badgeDiameter = size.badgeSize;
     final borderWidth = badgeDiameter * 0.15;
     
@@ -194,7 +194,7 @@ class CustomAvatar extends StatelessWidget {
           color: badgeColor,
           shape: BoxShape.circle,
           border: Border.all(
-            color: AppColors.surfaceWhite,
+            color: context.appSurface, // Adapt with surface/background
             width: borderWidth,
           ),
         ),
