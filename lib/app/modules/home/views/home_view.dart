@@ -5,6 +5,8 @@ import '../../../pages/bars_navigation/nav_bars_page.dart';
 import '../../../pages/bars_navigation/bottom_and_tabs_page.dart';
 import '../../../pages/bars_navigation/search_bars_page.dart';
 import '../../text_fields/views/text_fields_view.dart';
+import '../../buttons/views/buttons_view.dart';
+import '../../toggles/views/toggles_view.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../widgets/custom_avatar.dart';
 import '../../../widgets/chat_list_tile.dart';
@@ -18,8 +20,12 @@ class HomeView extends GetView<HomeController> {
 
   Widget _buildContent(BuildContext context, int index, String menuTitle) {
     switch (index) {
+      case 0: // Controls / Buttons
+        return const ButtonsView();
       case 1: // Controls / Text Fields
         return const TextFieldsView();
+      case 2: // Controls / Toggles & Choices
+        return const TogglesView();
       case 3: // Bars / Nav Bars
         return const NavBarsPage();
       case 4: // Navigation / Bottom & Tabs
@@ -57,12 +63,12 @@ class HomeView extends GetView<HomeController> {
             Text('Initials Avatar', style: AppTypography.heading1.adapt(context)),
             const SizedBox(height: AppSpacing.lg),
             _buildAvatarGrid(initials: 'SF', badgeType: AvatarBadgeType.online),
-            
+
             const SizedBox(height: AppSpacing.xxl),
             Text('Icon Avatar', style: AppTypography.heading1.adapt(context)),
             const SizedBox(height: AppSpacing.lg),
             _buildAvatarGrid(defaultIcon: Icons.person, badgeType: AvatarBadgeType.offline),
-            
+
             const SizedBox(height: AppSpacing.xxl),
             Text('Image Avatar', style: AppTypography.heading1.adapt(context)),
             const SizedBox(height: AppSpacing.lg),
@@ -85,7 +91,7 @@ class HomeView extends GetView<HomeController> {
     int notificationCount = 0,
   }) {
     final sizes = AvatarSize.values.reversed.toList();
-    
+
     return Wrap(
       spacing: AppSpacing.xl,
       runSpacing: AppSpacing.xl,
@@ -235,17 +241,17 @@ class HomeView extends GetView<HomeController> {
           Text('Normal Input State', style: AppTypography.heading2.adapt(context)),
           const SizedBox(height: AppSpacing.md),
           const ChatInputField(),
-          
+
           const SizedBox(height: AppSpacing.xxl),
           Text('Input with Typed Text', style: AppTypography.heading2.adapt(context)),
           const SizedBox(height: AppSpacing.md),
           const ChatInputField(initialText: 'Hey! Just finished the draft for the project. Need your feedback by tomorrow if possible.'),
-          
+
           const SizedBox(height: AppSpacing.xxl),
           Text('Voice Note Recording State', style: AppTypography.heading2.adapt(context)),
           const SizedBox(height: AppSpacing.md),
           const ChatInputField(state: ChatInputState.recording),
-          
+
           const SizedBox(height: AppSpacing.xxl),
           Text('Action Summary Box (Suggest a reply)', style: AppTypography.heading2.adapt(context)),
           const SizedBox(height: AppSpacing.md),
@@ -267,7 +273,7 @@ class HomeView extends GetView<HomeController> {
               content: 'The user expressed interest in a watch listed for sale and confirmed its availability with the seller. They negotiated the price down from \$130 to \$120.',
             ),
           ),
-          
+
           const SizedBox(height: AppSpacing.xxl),
           Text('Attachment Popup Menu', style: AppTypography.heading2.adapt(context)),
           const SizedBox(height: AppSpacing.md),
@@ -307,7 +313,7 @@ class HomeView extends GetView<HomeController> {
                     ),
                   ),
                   Obx(
-                    () => IconButton(
+                        () => IconButton(
                       icon: Icon(
                         controller.isDarkMode.value
                             ? Icons.dark_mode
@@ -373,7 +379,7 @@ class HomeView extends GetView<HomeController> {
           return Scaffold(
             appBar: AppBar(
               title: Obx(
-                () => Text(controller.menus[controller.selectedIndex.value]),
+                    () => Text(controller.menus[controller.selectedIndex.value]),
               ),
             ),
             drawer: Drawer(child: _sidebarContent(context, isDrawer: true)),
