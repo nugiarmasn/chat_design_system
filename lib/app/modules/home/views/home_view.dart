@@ -8,7 +8,7 @@ import '../../text_fields/views/text_fields_view.dart';
 import '../../buttons/views/buttons_view.dart';
 import '../../toggles/views/toggles_view.dart';
 import '../../chat_area/views/chat_area_view.dart';
-import '../../index_list/views/index_list_view.dart'; // <-- TAMBAHKAN IMPORT INI
+import '../../index_list/views/index_list_view.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../widgets/custom_avatar.dart';
 import '../../../widgets/chat_list_tile.dart';
@@ -35,8 +35,8 @@ class HomeView extends GetView<HomeController> {
         return const SearchBarsPage();
       case 8:
         return const ChatAreaView();
-      case 9: // Lists / Chat & Users
-        return const IndexListView(); // <-- UBAH MENJADI IndexListView
+      case 9:
+        return const IndexListView();
       case 10:
         return _buildMessageComposerContent(context);
       case 11:
@@ -286,7 +286,7 @@ class HomeView extends GetView<HomeController> {
   Widget _sidebarContent(BuildContext context, {required bool isDrawer}) {
     return Container(
       width: isDrawer ? null : 280,
-      color: const Color(0xFFF4F5F7),
+      color: context.appSurface, // <-- PERBAIKAN: Warna background dinamis
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,7 +299,11 @@ class HomeView extends GetView<HomeController> {
                   const Flexible(
                     child: Text(
                       'Component Library',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
                   Obx(
@@ -326,7 +330,7 @@ class HomeView extends GetView<HomeController> {
                         controller.menus[index],
                         style: TextStyle(
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected ? const Color(0xFF0052CC) : Colors.black87,
+                          color: isSelected ? const Color(0xFF0052CC) : context.appTextPrimary,
                         ),
                       ),
                       selected: isSelected,
@@ -362,8 +366,12 @@ class HomeView extends GetView<HomeController> {
           return Scaffold(
             appBar: AppBar(
               title: Obx(() => Text(controller.menus[controller.selectedIndex.value])),
+              backgroundColor: context.appBackground,
             ),
-            drawer: Drawer(child: _sidebarContent(context, isDrawer: true)),
+            drawer: Drawer(
+              backgroundColor: context.appSurface, // <-- PERBAIKAN: Warna Drawer dinamis
+              child: _sidebarContent(context, isDrawer: true),
+            ),
             body: contentArea,
           );
         }
