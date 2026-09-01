@@ -16,7 +16,7 @@ class HomeView extends GetView<HomeController> {
   // Breakpoint: di bawah lebar ini, sidebar disembunyikan jadi Drawer.
   static const double _mobileBreakpoint = 700;
 
-  Widget _buildContent(int index, String menuTitle) {
+  Widget _buildContent(BuildContext context, int index, String menuTitle) {
     switch (index) {
       case 1: // Controls / Text Fields
         return const TextFieldsView();
@@ -27,11 +27,11 @@ class HomeView extends GetView<HomeController> {
       case 5: // Bars / Search Bars
         return const SearchBarsPage();
       case 9: // Lists / Chat & Users
-        return _buildChatListContent();
+        return _buildChatListContent(context);
       case 10: // Message Area
-        return _buildMessageComposerContent();
+        return _buildMessageComposerContent(context);
       case 11: // Views / Avatars & Badges
-        return _buildAvatarsContent();
+        return _buildAvatarsContent(context);
       default:
         return Center(
           child: Padding(
@@ -39,32 +39,32 @@ class HomeView extends GetView<HomeController> {
             child: Text(
               'Halaman $menuTitle akan dirender di sini.',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
+              style: TextStyle(fontSize: 18, color: context.appTextSecondary),
             ),
           ),
         );
     }
   }
 
-  Widget _buildAvatarsContent() {
+  Widget _buildAvatarsContent(BuildContext context) {
     return Container(
-      color: AppColors.backgroundLight,
+      color: context.appBackground,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Initials Avatar', style: AppTypography.heading1),
+            Text('Initials Avatar', style: AppTypography.heading1.adapt(context)),
             const SizedBox(height: AppSpacing.lg),
             _buildAvatarGrid(initials: 'SF', badgeType: AvatarBadgeType.online),
             
             const SizedBox(height: AppSpacing.xxl),
-            Text('Icon Avatar', style: AppTypography.heading1),
+            Text('Icon Avatar', style: AppTypography.heading1.adapt(context)),
             const SizedBox(height: AppSpacing.lg),
             _buildAvatarGrid(defaultIcon: Icons.person, badgeType: AvatarBadgeType.offline),
             
             const SizedBox(height: AppSpacing.xxl),
-            Text('Image Avatar', style: AppTypography.heading1),
+            Text('Image Avatar', style: AppTypography.heading1.adapt(context)),
             const SizedBox(height: AppSpacing.lg),
             _buildAvatarGrid(
               imageUrl: 'https://i.pravatar.cc/150?u=scott',
@@ -128,9 +128,9 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildChatListContent() {
+  Widget _buildChatListContent(BuildContext context) {
     return Container(
-      color: AppColors.surfaceWhite,
+      color: context.appSurface,
       child: ListView(
         children: [
           ChatListTile(
@@ -141,7 +141,7 @@ class HomeView extends GetView<HomeController> {
             readStatus: ChatReadStatus.read,
             onTap: () {},
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.appDivider),
           ChatListTile(
             avatarInitials: 'SF',
             name: 'Scott Franklin',
@@ -150,7 +150,7 @@ class HomeView extends GetView<HomeController> {
             readStatus: ChatReadStatus.delivered,
             onTap: () {},
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.appDivider),
           ChatListTile(
             avatarInitials: 'SF',
             name: 'Scott Franklin',
@@ -159,7 +159,7 @@ class HomeView extends GetView<HomeController> {
             readStatus: ChatReadStatus.none,
             onTap: () {},
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.appDivider),
           ChatListTile(
             avatarInitials: 'SF',
             name: 'Scott Franklin',
@@ -169,7 +169,7 @@ class HomeView extends GetView<HomeController> {
             readStatus: ChatReadStatus.read,
             onTap: () {},
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.appDivider),
           ChatListTile(
             avatarInitials: 'SF',
             name: 'Scott Franklin',
@@ -179,7 +179,7 @@ class HomeView extends GetView<HomeController> {
             readStatus: ChatReadStatus.none,
             onTap: () {},
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.appDivider),
           ChatListTile(
             avatarIcon: Icons.group,
             name: 'Travel Buddies',
@@ -189,7 +189,7 @@ class HomeView extends GetView<HomeController> {
             readStatus: ChatReadStatus.read,
             onTap: () {},
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.appDivider),
           ChatListTile(
             avatarIcon: Icons.group,
             name: 'Travel Buddies',
@@ -199,7 +199,7 @@ class HomeView extends GetView<HomeController> {
             readStatus: ChatReadStatus.none,
             onTap: () {},
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.appDivider),
           ChatListTile(
             avatarIcon: Icons.group,
             name: 'Travel Buddies',
@@ -210,7 +210,7 @@ class HomeView extends GetView<HomeController> {
             readStatus: ChatReadStatus.read,
             onTap: () {},
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.appDivider),
           ChatListTile(
             avatarIcon: Icons.group,
             name: 'Travel Buddies',
@@ -226,28 +226,28 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildMessageComposerContent() {
+  Widget _buildMessageComposerContent(BuildContext context) {
     return Container(
-      color: AppColors.backgroundLight,
+      color: context.appBackground,
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.xl),
         children: [
-          Text('Normal Input State', style: AppTypography.heading2),
+          Text('Normal Input State', style: AppTypography.heading2.adapt(context)),
           const SizedBox(height: AppSpacing.md),
           const ChatInputField(),
           
           const SizedBox(height: AppSpacing.xxl),
-          Text('Input with Typed Text', style: AppTypography.heading2),
+          Text('Input with Typed Text', style: AppTypography.heading2.adapt(context)),
           const SizedBox(height: AppSpacing.md),
           const ChatInputField(initialText: 'Hey! Just finished the draft for the project. Need your feedback by tomorrow if possible.'),
           
           const SizedBox(height: AppSpacing.xxl),
-          Text('Voice Note Recording State', style: AppTypography.heading2),
+          Text('Voice Note Recording State', style: AppTypography.heading2.adapt(context)),
           const SizedBox(height: AppSpacing.md),
           const ChatInputField(state: ChatInputState.recording),
           
           const SizedBox(height: AppSpacing.xxl),
-          Text('Action Summary Box (Suggest a reply)', style: AppTypography.heading2),
+          Text('Action Summary Box (Suggest a reply)', style: AppTypography.heading2.adapt(context)),
           const SizedBox(height: AppSpacing.md),
           const ChatInputField(
             topWidget: ActionSummaryBox(
@@ -258,7 +258,7 @@ class HomeView extends GetView<HomeController> {
           ),
 
           const SizedBox(height: AppSpacing.xxl),
-          Text('Action Summary Box (Conversation summary)', style: AppTypography.heading2),
+          Text('Action Summary Box (Conversation summary)', style: AppTypography.heading2.adapt(context)),
           const SizedBox(height: AppSpacing.md),
           const ChatInputField(
             topWidget: ActionSummaryBox(
@@ -269,7 +269,7 @@ class HomeView extends GetView<HomeController> {
           ),
           
           const SizedBox(height: AppSpacing.xxl),
-          Text('Attachment Popup Menu', style: AppTypography.heading2),
+          Text('Attachment Popup Menu', style: AppTypography.heading2.adapt(context)),
           const SizedBox(height: AppSpacing.md),
           const Align(
             alignment: Alignment.centerLeft,
@@ -365,7 +365,7 @@ class HomeView extends GetView<HomeController> {
         final contentArea = Obx(() {
           final index = controller.selectedIndex.value;
           final title = controller.menus[index];
-          return _buildContent(index, title);
+          return _buildContent(context, index, title);
         });
 
         if (isMobile) {

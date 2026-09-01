@@ -93,3 +93,28 @@ class AppSpacing {
   static const double xl = 32.0;
   static const double xxl = 48.0;
 }
+
+// --- Tambahan untuk mendukung Dark Mode secara dinamis ---
+
+extension DynamicThemeContext on BuildContext {
+  bool get isDark => Theme.of(this).brightness == Brightness.dark;
+
+  Color get appBackground => isDark ? const Color(0xFF121212) : AppColors.backgroundLight;
+  Color get appSurface => isDark ? const Color(0xFF1E1E1E) : AppColors.surfaceWhite;
+  Color get appTextPrimary => isDark ? const Color(0xFFF5F5F5) : AppColors.textPrimary;
+  Color get appTextSecondary => isDark ? const Color(0xFFAAAAAA) : AppColors.textSecondary;
+  Color get appDivider => isDark ? const Color(0xFF333333) : AppColors.divider;
+}
+
+extension DynamicTextStyle on TextStyle {
+  /// Mengubah warna teks secara otomatis jika mode gelap aktif
+  TextStyle adapt(BuildContext context) {
+    if (Theme.of(context).brightness == Brightness.dark) {
+      if (color == AppColors.textPrimary) return copyWith(color: const Color(0xFFF5F5F5));
+      if (color == AppColors.textSecondary) return copyWith(color: const Color(0xFFAAAAAA));
+      if (color == AppColors.textTertiary) return copyWith(color: const Color(0xFF777777));
+    }
+    return this;
+  }
+}
+
