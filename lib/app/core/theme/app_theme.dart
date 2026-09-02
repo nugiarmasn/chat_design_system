@@ -8,6 +8,7 @@ class AppColors {
   static const Color primaryBlue = Color(0xFF007AFF);
   static const Color primaryBlueLight = Color(0xFFE5F1FF);
   static const Color primaryPurple = Color(0xFFA5A6F6);
+  static const Color deepPurple = Color(0xFF673AB7); // <-- TAMBAHKAN INI
 
   // --- ALIAS UNTUK KOMPONEN DEV 1 AGAR TIDAK ERROR ---
   static const Color primary = primaryBlue;
@@ -131,7 +132,7 @@ extension DynamicTextStyle on TextStyle {
   }
 }
 
-// --- SETUP THEMEDATA UNTUK GETX (Wajib agar tombol bulan berfungsi) ---
+// --- SETUP THEMEDATA UNTUK GETX ---
 class AppTheme {
   static final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
