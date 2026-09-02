@@ -3,6 +3,10 @@ import 'package:flutter/cupertino.dart';
 import '../core/theme/app_theme.dart';
 import 'custom_avatar.dart';
 
+// Warna spesifik Figma untuk tombol aktif
+const Color _figmaPurple = Color(0xFF5B38C9);
+const Color _figmaGrey = Color(0xFFE5E5EA);
+
 enum ChatInputVariant {
   defaultState,
   focus,
@@ -33,19 +37,19 @@ class ChatInputField extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             color: context.appSurface,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16), // Rounded seperti Figma
             border: Border.all(
               color: variant == ChatInputVariant.focus || variant == ChatInputVariant.typing
-                  ? AppColors.textSecondary.withOpacity(0.5)
-                  : context.appDivider,
+                  ? _figmaPurple.withOpacity(0.3)
+                  : context.appDivider.withOpacity(0.5),
+              width: 1,
             ),
             boxShadow: [
-              if (variant == ChatInputVariant.focus || variant == ChatInputVariant.typing)
-                BoxShadow(
-                  color: AppColors.textSecondary.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 15,
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
           child: Column(
@@ -54,6 +58,7 @@ class ChatInputField extends StatelessWidget {
             children: [
               if (variant == ChatInputVariant.editMessage) ...[
                 _buildEditHeader(context),
+                Divider(height: 1, color: context.appDivider.withOpacity(0.5)),
               ],
               _buildInputArea(context),
               _buildBottomActions(context),
@@ -80,9 +85,9 @@ class ChatInputField extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -91,8 +96,8 @@ class ChatInputField extends StatelessWidget {
         children: users.map((u) {
           final isSelected = u['selected'] == true;
           return Container(
-            color: isSelected ? context.appDivider.withOpacity(0.5) : Colors.transparent,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+            color: isSelected ? context.appDivider.withOpacity(0.3) : Colors.transparent,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
             child: Row(
               children: [
                 CustomAvatar(
@@ -104,7 +109,7 @@ class ChatInputField extends StatelessWidget {
                 Text(
                   u['name'] as String,
                   style: AppTypography.bodyMedium.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   ).adapt(context),
                 ),
               ],
@@ -117,20 +122,20 @@ class ChatInputField extends StatelessWidget {
 
   Widget _buildEditHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: context.isDark ? context.appDivider.withOpacity(0.2) : AppColors.backgroundLight,
+        color: context.isDark ? Colors.white10 : const Color(0xFFF8F9FA),
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(12),
-          topRight: Radius.circular(12),
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
       ),
-      width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Edit Message', style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold).adapt(context)),
-          Text('Previous message', style: AppTypography.caption),
+          Text('Edit Message', style: AppTypography.caption.copyWith(fontWeight: FontWeight.bold, color: context.appTextPrimary)),
+          Text('Previous message', style: AppTypography.caption.copyWith(color: context.appTextSecondary, fontSize: 10)),
         ],
       ),
     );
@@ -140,7 +145,7 @@ class ChatInputField extends StatelessWidget {
     String text = '';
     String hint = 'Type your message...';
 
-    if (variant == ChatInputVariant.typing) {
+    if (variant == ChatInputVariant.typing || variant == ChatInputVariant.editMessage) {
       text = 'First line|';
       hint = '';
     } else if (variant == ChatInputVariant.multiline) {
@@ -149,62 +154,56 @@ class ChatInputField extends StatelessWidget {
     } else if (variant == ChatInputVariant.mentioned) {
       text = '';
       hint = '';
-    } else if (variant == ChatInputVariant.editMessage) {
-      text = 'First line|';
-      hint = '';
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+      padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.md, top: AppSpacing.md, bottom: 8),
       child: variant == ChatInputVariant.mentioned
           ? RichText(
-              text: TextSpan(
-                style: AppTypography.body.adapt(context),
-                children: [
-                  TextSpan(text: '@john ', style: TextStyle(color: AppColors.primaryBlue)),
-                  TextSpan(text: '@a|'),
-                ],
-              ),
-            )
+        text: TextSpan(
+          style: AppTypography.body.adapt(context),
+          children: [
+            TextSpan(text: '@john ', style: TextStyle(color: _figmaPurple, fontWeight: FontWeight.w500)),
+            TextSpan(text: '@a|'),
+          ],
+        ),
+      )
           : Text(
-              text.isEmpty ? hint : text,
-              style: text.isEmpty 
-                  ? AppTypography.bodySecondary.adapt(context)
-                  : AppTypography.body.copyWith(fontWeight: FontWeight.w600).adapt(context),
-            ),
+        text.isEmpty ? hint : text,
+        style: text.isEmpty
+            ? AppTypography.bodySecondary.copyWith(color: Colors.grey.shade400).adapt(context)
+            : AppTypography.body.copyWith(fontWeight: FontWeight.w400).adapt(context),
+      ),
     );
   }
 
   Widget _buildBottomActions(BuildContext context) {
     bool isActive = variant == ChatInputVariant.typing || variant == ChatInputVariant.multiline || variant == ChatInputVariant.mentioned || variant == ChatInputVariant.editMessage;
-    
+
     return Padding(
-      padding: const EdgeInsets.only(left: AppSpacing.sm, right: AppSpacing.sm, bottom: AppSpacing.sm),
+      padding: const EdgeInsets.only(left: 8, right: 12, bottom: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: const [
-                IconAction(icon: Icons.add_circle_outline),
-                IconAction(icon: Icons.mic_none),
-                IconAction(icon: Icons.emoji_emotions_outlined),
-                IconAction(icon: Icons.sticky_note_2_outlined),
-                IconAction(icon: Icons.auto_awesome),
-              ],
-            ),
+          Row(
+            children: const [
+              IconAction(icon: CupertinoIcons.add_circled),
+              IconAction(icon: CupertinoIcons.mic),
+              IconAction(icon: CupertinoIcons.smiley),
+              IconAction(icon: CupertinoIcons.doc),
+              IconAction(icon: CupertinoIcons.sparkles),
+            ],
           ),
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isActive ? AppColors.deepPurple : context.appDivider,
+              color: isActive ? _figmaPurple : _figmaGrey,
               shape: BoxShape.circle,
             ),
             child: Icon(
-              variant == ChatInputVariant.editMessage ? Icons.check : Icons.send,
-              color: isActive ? Colors.white : AppColors.textTertiary,
-              size: 20,
+              variant == ChatInputVariant.editMessage ? Icons.check : Icons.send_rounded,
+              color: Colors.white,
+              size: 18,
             ),
           ),
         ],
@@ -215,15 +214,13 @@ class ChatInputField extends StatelessWidget {
 
 class IconAction extends StatelessWidget {
   final IconData icon;
-  final Color? color;
-  final double? size;
-  const IconAction({super.key, required this.icon, this.color, this.size});
+  const IconAction({super.key, required this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Icon(icon, color: color ?? context.appTextSecondary, size: size ?? 24),
+      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+      child: Icon(icon, color: Colors.grey.shade500, size: 22),
     );
   }
 }
@@ -252,53 +249,59 @@ class VoiceComposer extends StatelessWidget {
     if (variant == VoiceComposerVariant.preview) {
       return _buildPreviewState(context);
     }
-    
+
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(maxWidth: 320),
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+      constraints: const BoxConstraints(maxWidth: 300),
+      padding: const EdgeInsets.symmetric(vertical: 32),
       decoration: BoxDecoration(
         color: context.appSurface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: AppColors.deepPurple.withOpacity(0.1),
-            child: const CircleAvatar(
-              radius: 30,
-              backgroundColor: AppColors.deepPurple,
-              child: Icon(Icons.mic, color: Colors.white, size: 32),
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: variant == VoiceComposerVariant.defaultState ? _figmaGrey : _figmaPurple,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+                CupertinoIcons.mic_fill,
+                color: variant == VoiceComposerVariant.defaultState ? Colors.white : Colors.white,
+                size: 36
             ),
           ),
           if (variant != VoiceComposerVariant.defaultState) ...[
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: 16),
             Text(
               '00:00:10',
-              style: AppTypography.bodyMedium.adapt(context),
+              style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600).adapt(context),
             ),
+          ] else ... [
+            const SizedBox(height: 36),
           ],
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildCircleIconBtn(context, Icons.delete_outline, false),
-              const SizedBox(width: AppSpacing.md),
+              _buildCircleIconBtn(context, CupertinoIcons.trash, false),
+              const SizedBox(width: 24),
               if (variant == VoiceComposerVariant.defaultState || variant == VoiceComposerVariant.pause)
-                _buildCircleIconBtn(context, Icons.mic, true, isRed: true)
+                _buildCircleIconBtn(context, CupertinoIcons.mic_fill, true, isRed: true)
               else
-                _buildCircleIconBtn(context, Icons.pause, true, isRed: true),
-              const SizedBox(width: AppSpacing.md),
-              _buildCircleIconBtn(context, Icons.stop, false),
+                _buildCircleIconBtn(context, CupertinoIcons.pause_fill, true, isRed: true),
+              const SizedBox(width: 24),
+              _buildCircleIconBtn(context, CupertinoIcons.stop_fill, false),
             ],
           ),
         ],
@@ -309,16 +312,16 @@ class VoiceComposer extends StatelessWidget {
   Widget _buildPreviewState(BuildContext context) {
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(maxWidth: 320),
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      constraints: const BoxConstraints(maxWidth: 300),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: context.appSurface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -326,47 +329,42 @@ class VoiceComposer extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.deepPurple,
-              borderRadius: BorderRadius.circular(24),
+              color: _figmaPurple,
+              borderRadius: BorderRadius.circular(30),
             ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.play_arrow, color: AppColors.deepPurple, size: 20),
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                  child: const Icon(Icons.play_arrow_rounded, color: _figmaPurple, size: 20),
                 ),
-                const SizedBox(width: AppSpacing.sm),
+                const SizedBox(width: 12),
                 Expanded(child: _buildAudioWaveform()),
-                const SizedBox(width: AppSpacing.sm),
-                const Text('00:00/00:32', style: TextStyle(color: Colors.white, fontSize: 10)),
+                const SizedBox(width: 12),
+                const Text('00:00/00:32', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500)),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildCircleIconBtn(context, Icons.delete_outline, false),
-              const SizedBox(width: AppSpacing.lg),
+              _buildCircleIconBtn(context, CupertinoIcons.trash, false),
+              const SizedBox(width: 24),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
-                  ],
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10, offset: const Offset(0, 4))],
                 ),
-                child: const Icon(Icons.send, color: AppColors.deepPurple, size: 28),
+                child: const Icon(Icons.send_rounded, color: _figmaPurple, size: 24),
               ),
-              const SizedBox(width: AppSpacing.lg),
-              _buildCircleIconBtn(context, Icons.mic_none, false),
+              const SizedBox(width: 24),
+              _buildCircleIconBtn(context, CupertinoIcons.mic, false),
             ],
           ),
         ],
@@ -377,35 +375,38 @@ class VoiceComposer extends StatelessWidget {
   Widget _buildAudioWaveform() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: List.generate(20, (index) {
-        final heights = [4, 8, 12, 6, 16, 10, 4, 18, 14, 8, 20, 10, 6, 12, 16, 8, 4, 14, 6, 8];
+      children: List.generate(15, (index) {
+        final heights = [4, 8, 12, 6, 16, 10, 4, 18, 14, 8, 20, 10, 6, 12, 8];
         return Container(
-          width: 2,
-          height: heights[index].toDouble(),
-          color: Colors.white.withOpacity(0.7),
+            width: 2.5,
+            height: heights[index].toDouble(),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(2),
+            )
         );
       }),
     );
   }
 
   Widget _buildCircleIconBtn(BuildContext context, IconData icon, bool isSolid, {bool isRed = false}) {
-    Color iconColor = isRed ? AppColors.error : context.appTextSecondary;
-    Color bgColor = isRed ? AppColors.error.withOpacity(0.1) : context.appDivider.withOpacity(0.5);
-    
+    Color iconColor = isRed ? AppColors.error : Colors.grey.shade600;
+    Color bgColor = isRed ? AppColors.error.withOpacity(0.1) : Colors.transparent;
+
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isSolid ? bgColor : Colors.transparent,
+        color: bgColor,
         shape: BoxShape.circle,
-        border: isSolid ? null : Border.all(color: context.appDivider),
+        border: isSolid ? null : Border.all(color: Colors.grey.shade300),
       ),
-      child: Icon(icon, color: iconColor, size: 24),
+      child: Icon(icon, color: iconColor, size: 20),
     );
   }
 }
 
 // ==========================================
-// POPUP / FEATURE VARIANTS
+// POPUPS / FEATURE VARIANTS
 // ==========================================
 
 class PopupAttachment extends StatelessWidget {
@@ -420,7 +421,7 @@ class PopupAttachment extends StatelessWidget {
         _buildPopupContainer(
           context: context,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -429,53 +430,46 @@ class PopupAttachment extends StatelessWidget {
                 _buildMenuItem(context, CupertinoIcons.video_camera_solid, 'Attach Video'),
                 _buildMenuItem(context, CupertinoIcons.play_circle_fill, 'Attach Audio'),
                 _buildMenuItem(context, CupertinoIcons.doc_fill, 'Attach Document'),
-                _buildMenuItem(context, Icons.menu, 'Poll'),
-                _buildWhiteboardMenuItem(context),
+                _buildMenuItem(context, Icons.poll, 'Poll'),
+                _buildMenuItem(context, Icons.gesture, 'Collaborative Whiteboard'),
                 _buildMenuItem(context, Icons.edit_document, 'Collaborative Document'),
               ],
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: 12),
+        // Bottom Action Preview
         Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(maxWidth: 280),
           decoration: BoxDecoration(
             color: context.appSurface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: context.appDivider),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
           ),
-          padding: const EdgeInsets.all(AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Container(
-                        padding: const EdgeInsets.all(4.0),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF130C88),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.close, color: Colors.white, size: 20),
-                      ),
-                    ),
-                    const IconAction(icon: CupertinoIcons.mic),
-                    const IconAction(icon: CupertinoIcons.smiley),
-                    const IconAction(icon: CupertinoIcons.doc),
-                    const IconAction(icon: CupertinoIcons.sparkles),
-                  ],
-                ),
+              Row(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(color: _figmaPurple, shape: BoxShape.circle),
+                    child: const Icon(Icons.close, color: Colors.white, size: 16),
+                  ),
+                  const IconAction(icon: CupertinoIcons.mic),
+                  const IconAction(icon: CupertinoIcons.smiley),
+                  const IconAction(icon: CupertinoIcons.doc),
+                  const IconAction(icon: CupertinoIcons.sparkles),
+                ],
               ),
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: context.appDivider,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.send, color: AppColors.textTertiary, size: 20),
+                decoration: const BoxDecoration(color: _figmaGrey, shape: BoxShape.circle),
+                child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
               ),
             ],
           ),
@@ -484,37 +478,14 @@ class PopupAttachment extends StatelessWidget {
     );
   }
 
-  Widget _buildWhiteboardMenuItem(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 12, top: 8, bottom: 8),
-      child: Row(
-        children: [
-          Container(
-            width: 26,
-            height: 26,
-            decoration: BoxDecoration(
-              color: const Color(0xFF130C88),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: const Center(
-              child: Icon(Icons.gesture, color: Colors.white, size: 18),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text('Collaborative Whiteboard', style: AppTypography.bodyMedium.copyWith(fontSize: 16, fontWeight: FontWeight.w500).adapt(context)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildMenuItem(BuildContext context, IconData icon, String label) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 12, top: 8, bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF130C88), size: 26),
-          const SizedBox(width: 8),
-          Text(label, style: AppTypography.bodyMedium.copyWith(fontSize: 16, fontWeight: FontWeight.w500).adapt(context)),
+          Icon(icon, color: _figmaPurple, size: 22),
+          const SizedBox(width: 16),
+          Text(label, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500).adapt(context)),
         ],
       ),
     );
@@ -533,33 +504,31 @@ class PopupEmoji extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Center(child: Text('Smiley & People', style: AppTypography.caption)),
+            padding: const EdgeInsets.only(top: 16, bottom: 8),
+            child: Center(child: Text('Smiley & People', style: AppTypography.caption.copyWith(color: Colors.grey.shade500))),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: List.generate(40, (index) {
-                return const Text('😀', style: TextStyle(fontSize: 20));
-              }),
+              spacing: 12,
+              runSpacing: 12,
+              children: List.generate(35, (index) => const Text('😀', style: TextStyle(fontSize: 22))),
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          Divider(height: 1, color: context.appDivider),
+          const SizedBox(height: 16),
+          Divider(height: 1, color: context.appDivider.withOpacity(0.5)),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Icon(Icons.access_time, color: AppColors.deepPurple, size: 20),
-                Icon(Icons.emoji_emotions_outlined, color: context.appTextSecondary, size: 20),
-                Icon(Icons.pets, color: context.appTextSecondary, size: 20),
-                Icon(Icons.fastfood, color: context.appTextSecondary, size: 20),
-                Icon(Icons.sports_soccer, color: context.appTextSecondary, size: 20),
-                Icon(Icons.directions_car, color: context.appTextSecondary, size: 20),
-                Icon(Icons.lightbulb_outline, color: context.appTextSecondary, size: 20),
+                const Icon(Icons.access_time, color: _figmaPurple, size: 22),
+                Icon(Icons.emoji_emotions_outlined, color: Colors.grey.shade400, size: 22),
+                Icon(Icons.pets, color: Colors.grey.shade400, size: 22),
+                Icon(Icons.fastfood, color: Colors.grey.shade400, size: 22),
+                Icon(Icons.sports_soccer, color: Colors.grey.shade400, size: 22),
+                Icon(Icons.directions_car, color: Colors.grey.shade400, size: 22),
+                Icon(Icons.lightbulb_outline, color: Colors.grey.shade400, size: 22),
               ],
             ),
           ),
@@ -581,45 +550,45 @@ class PopupSticker extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Icon(Icons.access_time, color: AppColors.deepPurple, size: 20),
-                Icon(Icons.emoji_emotions_outlined, color: context.appTextSecondary, size: 20),
-                Icon(Icons.pets, color: context.appTextSecondary, size: 20),
-                Icon(Icons.fastfood, color: context.appTextSecondary, size: 20),
-                Icon(Icons.sports_soccer, color: context.appTextSecondary, size: 20),
-                Icon(Icons.directions_car, color: context.appTextSecondary, size: 20),
+                const Icon(Icons.access_time, color: _figmaPurple, size: 22),
+                Icon(Icons.emoji_emotions_outlined, color: Colors.grey.shade400, size: 22),
+                Icon(Icons.pets, color: Colors.grey.shade400, size: 22),
+                Icon(Icons.fastfood, color: Colors.grey.shade400, size: 22),
+                Icon(Icons.sports_soccer, color: Colors.grey.shade400, size: 22),
+                Icon(Icons.directions_car, color: Colors.grey.shade400, size: 22),
               ],
             ),
           ),
-          Divider(height: 1, color: context.appDivider),
+          Divider(height: 1, color: context.appDivider.withOpacity(0.5)),
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Text('Recent Stickers', style: AppTypography.caption),
+            padding: const EdgeInsets.only(left: 16, top: 12, bottom: 12),
+            child: Text('Recent Stickers', style: AppTypography.caption.copyWith(color: Colors.grey.shade500)),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Wrap(
               spacing: 16,
               runSpacing: 16,
               children: List.generate(6, (index) {
                 return Container(
-                  width: 60,
-                  height: 60,
+                  width: 65,
+                  height: 65,
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.orange.shade100.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.face, color: Colors.orange, size: 40),
+                  child: Center(
+                    child: Icon(Icons.face_retouching_natural, color: Colors.orange.shade400, size: 40),
                   ),
                 );
               }),
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -637,25 +606,28 @@ class PopupAiMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return _buildPopupContainer(
       context: context,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildMenuItem(context, Icons.chat_bubble_outline, 'Suggest a reply'),
-          _buildMenuItem(context, Icons.summarize_outlined, 'Conversation summary'),
-          _buildMenuItem(context, Icons.smart_toy_outlined, 'Ask AI Bot'),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildMenuItem(context, Icons.chat_bubble, 'Suggest a reply'),
+            _buildMenuItem(context, Icons.summarize, 'Conversation summary'),
+            _buildMenuItem(context, Icons.smart_toy, 'Ask AI Bot'),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildMenuItem(BuildContext context, IconData icon, String label) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.deepPurple, size: 20),
-          const SizedBox(width: AppSpacing.md),
-          Text(label, style: AppTypography.bodyMedium.adapt(context)),
+          Icon(icon, color: _figmaPurple, size: 20),
+          const SizedBox(width: 12),
+          Text(label, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500).adapt(context)),
         ],
       ),
     );
@@ -670,39 +642,47 @@ class AiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.appSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.appDivider),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(maxWidth: 320),
+          decoration: BoxDecoration(
+            color: context.appSurface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 4)),
+            ],
+            border: Border.all(color: Colors.grey.shade200),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(title, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600).adapt(context)),
-                Icon(Icons.close, size: 16, color: context.appTextSecondary),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16, right: 12, top: 12, bottom: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(title, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold).adapt(context)),
+                    Icon(CupertinoIcons.xmark, size: 16, color: Colors.grey.shade500),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: context.appDivider.withOpacity(0.5)),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                    content,
+                    style: AppTypography.bodyMedium.copyWith(height: 1.5, color: Colors.grey.shade800).adapt(context)
+                ),
+              ),
+            ],
           ),
-          Divider(height: 1, color: context.appDivider),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Text(content, style: AppTypography.bodyMedium.adapt(context)),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8),
+        const ChatInputField(variant: ChatInputVariant.defaultState),
+      ],
     );
   }
 }
@@ -720,18 +700,22 @@ class ConversationStarters extends StatelessWidget {
       'How\'s your day?',
     ];
 
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: chips.map((c) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: context.appSurface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: context.appDivider),
-        ),
-        child: Text(c, style: AppTypography.caption.adapt(context)),
-      )).toList(),
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 320),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 10,
+        children: chips.map((c) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: context.appSurface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))],
+          ),
+          child: Text(c, style: AppTypography.bodyMedium.copyWith(color: Colors.grey.shade700).adapt(context)),
+        )).toList(),
+      ),
     );
   }
 }
@@ -743,14 +727,11 @@ Widget _buildPopupContainer({required BuildContext context, required Widget chil
     constraints: const BoxConstraints(maxWidth: 280),
     decoration: BoxDecoration(
       color: context.appSurface,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 16,
-          offset: const Offset(0, 4),
-        ),
+        BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, 8)),
       ],
+      border: Border.all(color: Colors.grey.shade100),
     ),
     child: child,
   );
