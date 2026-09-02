@@ -10,6 +10,7 @@ enum ChatInputVariant {
   multiline,
   mentioned,
   editMessage,
+  aiActive,
 }
 
 class ChatInputField extends StatelessWidget {
@@ -177,6 +178,7 @@ class ChatInputField extends StatelessWidget {
 
   Widget _buildBottomActions(BuildContext context) {
     bool isActive = variant == ChatInputVariant.typing || variant == ChatInputVariant.multiline || variant == ChatInputVariant.mentioned || variant == ChatInputVariant.editMessage;
+    bool isAiActive = variant == ChatInputVariant.aiActive;
     
     return Padding(
       padding: const EdgeInsets.only(left: AppSpacing.sm, right: AppSpacing.sm, bottom: AppSpacing.sm),
@@ -186,12 +188,15 @@ class ChatInputField extends StatelessWidget {
           Expanded(
             child: Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
-              children: const [
-                IconAction(icon: Icons.add_circle_outline),
-                IconAction(icon: Icons.mic_none),
-                IconAction(icon: Icons.emoji_emotions_outlined),
-                IconAction(icon: Icons.sticky_note_2_outlined),
-                IconAction(icon: Icons.auto_awesome),
+              children: [
+                const IconAction(icon: Icons.add_circle_outline),
+                const IconAction(icon: CupertinoIcons.mic),
+                const IconAction(icon: CupertinoIcons.smiley),
+                const IconAction(icon: CupertinoIcons.doc),
+                IconAction(
+                  icon: CupertinoIcons.sparkles,
+                  color: isAiActive ? const Color(0xFF130C88) : null,
+                ),
               ],
             ),
           ),
@@ -249,76 +254,41 @@ class VoiceComposer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (variant == VoiceComposerVariant.preview) {
-      return _buildPreviewState(context);
-    }
-    
-    return Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(maxWidth: 320),
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-      decoration: BoxDecoration(
-        color: context.appSurface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: AppColors.deepPurple.withOpacity(0.1),
-            child: const CircleAvatar(
-              radius: 30,
-              backgroundColor: AppColors.deepPurple,
-              child: Icon(Icons.mic, color: Colors.white, size: 32),
-            ),
-          ),
-          if (variant != VoiceComposerVariant.defaultState) ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              '00:00:10',
-              style: AppTypography.bodyMedium.adapt(context),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.xl),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildCircleIconBtn(context, Icons.delete_outline, false),
-              const SizedBox(width: AppSpacing.md),
-              if (variant == VoiceComposerVariant.defaultState || variant == VoiceComposerVariant.pause)
-                _buildCircleIconBtn(context, Icons.mic, true, isRed: true)
-              else
-                _buildCircleIconBtn(context, Icons.pause, true, isRed: true),
-              const SizedBox(width: AppSpacing.md),
-              _buildCircleIconBtn(context, Icons.stop, false),
-            ],
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      verticalDirection: VerticalDirection.up,
+      children: [
+        _buildBottomForm(context),
+        _buildVoiceCard(context),
+      ],
     );
   }
 
-  Widget _buildPreviewState(BuildContext context) {
+  Widget _buildVoiceCard(BuildContext context) {
+    if (variant == VoiceComposerVariant.preview) {
+      return _buildPreviewCard(context);
+    }
+    
+    final bool isRecording = variant == VoiceComposerVariant.recording;
+    final bool isPause = variant == VoiceComposerVariant.pause;
+    final bool isDefault = variant == VoiceComposerVariant.defaultState;
+    
+    final Color darkPurple = const Color(0xFF130C88);
+    final Color brightRed = const Color(0xFFFF3B30);
+
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 320),
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(vertical: 24),
       decoration: BoxDecoration(
-        color: context.appSurface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -326,9 +296,68 @@ class VoiceComposer extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+            padding: EdgeInsets.all(isRecording ? 12.0 : 0.0),
             decoration: BoxDecoration(
-              color: AppColors.deepPurple,
+              shape: BoxShape.circle,
+              color: isRecording ? darkPurple.withOpacity(0.1) : Colors.transparent,
+            ),
+            child: CircleAvatar(
+              radius: 36,
+              backgroundColor: isDefault ? darkPurple.withOpacity(0.15) : darkPurple,
+              child: const Icon(Icons.mic, color: Colors.white, size: 36),
+            ),
+          ),
+          if (!isDefault) ...[
+            const SizedBox(height: 16),
+            Text(
+              '00:00:10',
+              style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500).adapt(context),
+            ),
+          ],
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildCircleIconBtn(context, Icons.delete_outline, iconColor: context.appTextSecondary),
+              const SizedBox(width: 24),
+              if (isRecording)
+                _buildCircleIconBtn(context, Icons.pause, iconColor: brightRed)
+              else
+                _buildCircleIconBtn(context, Icons.mic, iconColor: brightRed),
+              const SizedBox(width: 24),
+              _buildCircleIconBtn(context, Icons.stop, iconColor: context.appTextSecondary),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviewCard(BuildContext context) {
+    final Color darkPurple = const Color(0xFF130C88);
+
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 320),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: darkPurple,
               borderRadius: BorderRadius.circular(24),
             ),
             child: Row(
@@ -339,34 +368,34 @@ class VoiceComposer extends StatelessWidget {
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.play_arrow, color: AppColors.deepPurple, size: 20),
+                  child: Icon(Icons.play_arrow, color: darkPurple, size: 20),
                 ),
-                const SizedBox(width: AppSpacing.sm),
+                const SizedBox(width: 12),
                 Expanded(child: _buildAudioWaveform()),
-                const SizedBox(width: AppSpacing.sm),
-                const Text('00:00/00:32', style: TextStyle(color: Colors.white, fontSize: 10)),
+                const SizedBox(width: 12),
+                const Text('00:00/00:32', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildCircleIconBtn(context, Icons.delete_outline, false),
-              const SizedBox(width: AppSpacing.lg),
+              _buildCircleIconBtn(context, Icons.delete_outline, iconColor: context.appTextSecondary),
+              const SizedBox(width: 24),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: darkPurple,
                   shape: BoxShape.circle,
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
+                    BoxShadow(color: darkPurple.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4)),
                   ],
                 ),
-                child: const Icon(Icons.send, color: AppColors.deepPurple, size: 28),
+                child: const Icon(Icons.send, color: Colors.white, size: 24),
               ),
-              const SizedBox(width: AppSpacing.lg),
-              _buildCircleIconBtn(context, Icons.mic_none, false),
+              const SizedBox(width: 24),
+              _buildCircleIconBtn(context, Icons.mic_none, iconColor: context.appTextSecondary),
             ],
           ),
         ],
@@ -388,18 +417,53 @@ class VoiceComposer extends StatelessWidget {
     );
   }
 
-  Widget _buildCircleIconBtn(BuildContext context, IconData icon, bool isSolid, {bool isRed = false}) {
-    Color iconColor = isRed ? AppColors.error : context.appTextSecondary;
-    Color bgColor = isRed ? AppColors.error.withOpacity(0.1) : context.appDivider.withOpacity(0.5);
-    
+  Widget _buildCircleIconBtn(BuildContext context, IconData icon, {required Color iconColor}) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      width: 44,
+      height: 44,
       decoration: BoxDecoration(
-        color: isSolid ? bgColor : Colors.transparent,
         shape: BoxShape.circle,
-        border: isSolid ? null : Border.all(color: context.appDivider),
+        border: Border.all(color: context.appDivider),
       ),
-      child: Icon(icon, color: iconColor, size: 24),
+      child: Icon(icon, color: iconColor, size: 20),
+    );
+  }
+
+  Widget _buildBottomForm(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 320),
+      decoration: BoxDecoration(
+        color: context.appSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.appDivider),
+      ),
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: const [
+                IconAction(icon: Icons.add_circle_outline),
+                IconAction(icon: CupertinoIcons.mic),
+                IconAction(icon: CupertinoIcons.smiley),
+                IconAction(icon: CupertinoIcons.doc),
+                IconAction(icon: CupertinoIcons.sparkles),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: context.appDivider,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.send, color: AppColors.textTertiary, size: 20),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -635,27 +699,36 @@ class PopupAiMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildPopupContainer(
-      context: context,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildMenuItem(context, Icons.chat_bubble_outline, 'Suggest a reply'),
-          _buildMenuItem(context, Icons.summarize_outlined, 'Conversation summary'),
-          _buildMenuItem(context, Icons.smart_toy_outlined, 'Ask AI Bot'),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      verticalDirection: VerticalDirection.up,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const ChatInputField(variant: ChatInputVariant.aiActive),
+        const SizedBox(height: 8),
+        _buildPopupContainer(
+          context: context,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildMenuItem(context, CupertinoIcons.chat_bubble_text_fill, 'Suggest a reply'),
+              _buildMenuItem(context, CupertinoIcons.doc_text_fill, 'Conversation summary'),
+              _buildMenuItem(context, Icons.smart_toy, 'Ask AI Bot'),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildMenuItem(BuildContext context, IconData icon, String label) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.deepPurple, size: 20),
+          Icon(icon, color: const Color(0xFF130C88), size: 22),
           const SizedBox(width: AppSpacing.md),
-          Text(label, style: AppTypography.bodyMedium.adapt(context)),
+          Text(label, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500).adapt(context)),
         ],
       ),
     );
@@ -670,39 +743,71 @@ class AiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isSuggest = title.toLowerCase().contains('suggest');
+    
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      verticalDirection: VerticalDirection.up,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const ChatInputField(variant: ChatInputVariant.aiActive),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: context.appSurface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.appDivider),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(title, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600).adapt(context)),
+                    Icon(Icons.close, size: 20, color: context.appTextSecondary),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: context.appDivider),
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: isSuggest ? Column(
+                  children: [
+                    _buildSuggestItem(context, 'Thanks for handling the logistics, Michael. Your effort in securing the group discount for the hotel is much appreciated!'),
+                    const SizedBox(height: 12),
+                    _buildSuggestItem(context, 'Michael, I appreciate you taking care of the logistics and getting us that group discount at the hotel. Thanks a lot!'),
+                    const SizedBox(height: 12),
+                    _buildSuggestItem(context, 'Thank you, Michael, for organizing everything. Your work on getting the group discount for the hotel didn\'t go unnoticed!'),
+                  ],
+                ) : Text(content, style: AppTypography.bodyMedium.copyWith(height: 1.5).adapt(context)),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSuggestItem(BuildContext context, String text) {
     return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: context.appSurface,
-        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: context.appDivider),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(title, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600).adapt(context)),
-                Icon(Icons.close, size: 16, color: context.appTextSecondary),
-              ],
-            ),
-          ),
-          Divider(height: 1, color: context.appDivider),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Text(content, style: AppTypography.bodyMedium.adapt(context)),
-          ),
-        ],
-      ),
+      child: Text(text, style: AppTypography.bodyMedium.copyWith(height: 1.5).adapt(context)),
     );
   }
 }
@@ -720,18 +825,26 @@ class ConversationStarters extends StatelessWidget {
       'How\'s your day?',
     ];
 
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: chips.map((c) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: context.appSurface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: context.appDivider),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: chips.map((c) => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: context.appSurface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: context.appDivider),
+            ),
+            child: Text(c, style: AppTypography.caption.copyWith(fontSize: 13, fontWeight: FontWeight.w500).adapt(context)),
+          )).toList(),
         ),
-        child: Text(c, style: AppTypography.caption.adapt(context)),
-      )).toList(),
+        const SizedBox(height: 16),
+        const ChatInputField(variant: ChatInputVariant.defaultState),
+      ],
     );
   }
 }
