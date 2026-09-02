@@ -14,6 +14,7 @@ enum ChatInputVariant {
   multiline,
   mentioned,
   editMessage,
+  aiActive, // Tambahan dari temen lu
 }
 
 class ChatInputField extends StatelessWidget {
@@ -179,20 +180,27 @@ class ChatInputField extends StatelessWidget {
 
   Widget _buildBottomActions(BuildContext context) {
     bool isActive = variant == ChatInputVariant.typing || variant == ChatInputVariant.multiline || variant == ChatInputVariant.mentioned || variant == ChatInputVariant.editMessage;
+    bool isAiActive = variant == ChatInputVariant.aiActive; // Tambahan dari temen lu
 
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 12, bottom: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: const [
-              IconAction(icon: CupertinoIcons.add_circled),
-              IconAction(icon: CupertinoIcons.mic),
-              IconAction(icon: CupertinoIcons.smiley),
-              IconAction(icon: CupertinoIcons.doc),
-              IconAction(icon: CupertinoIcons.sparkles),
-            ],
+          Expanded(
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                const IconAction(icon: CupertinoIcons.add_circled),
+                const IconAction(icon: CupertinoIcons.mic),
+                const IconAction(icon: CupertinoIcons.smiley),
+                const IconAction(icon: CupertinoIcons.doc),
+                IconAction(
+                  icon: CupertinoIcons.sparkles,
+                  color: isAiActive ? _figmaPurple : null, // Aksen Figma digabung logika temen lu
+                ),
+              ],
+            ),
           ),
           Container(
             padding: const EdgeInsets.all(8),
@@ -214,13 +222,15 @@ class ChatInputField extends StatelessWidget {
 
 class IconAction extends StatelessWidget {
   final IconData icon;
-  const IconAction({super.key, required this.icon});
+  final Color? color; // Tambahan properti warna biar dinamis
+
+  const IconAction({super.key, required this.icon, this.color});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6.0),
-      child: Icon(icon, color: Colors.grey.shade500, size: 22),
+      child: Icon(icon, color: color ?? Colors.grey.shade500, size: 22),
     );
   }
 }
@@ -246,14 +256,31 @@ class VoiceComposer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Logika struktur layout temen lu (ada form chat di bawah Voice Card)
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      verticalDirection: VerticalDirection.up,
+      children: [
+        _buildBottomForm(context),
+        _buildVoiceCard(context),
+      ],
+    );
+  }
+
+  Widget _buildVoiceCard(BuildContext context) {
     if (variant == VoiceComposerVariant.preview) {
-      return _buildPreviewState(context);
+      return _buildPreviewCard(context);
     }
+
+    final bool isDefault = variant == VoiceComposerVariant.defaultState;
+    final bool isPause = variant == VoiceComposerVariant.pause;
 
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 300),
       padding: const EdgeInsets.symmetric(vertical: 32),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: context.appSurface,
         borderRadius: BorderRadius.circular(20),
@@ -272,16 +299,16 @@ class VoiceComposer extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: variant == VoiceComposerVariant.defaultState ? _figmaGrey : _figmaPurple,
+              color: isDefault ? _figmaGrey : _figmaPurple,
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
                 CupertinoIcons.mic_fill,
-                color: variant == VoiceComposerVariant.defaultState ? Colors.white : Colors.white,
+                color: Colors.white,
                 size: 36
             ),
           ),
-          if (variant != VoiceComposerVariant.defaultState) ...[
+          if (!isDefault) ...[
             const SizedBox(height: 16),
             Text(
               '00:00:10',
@@ -296,7 +323,7 @@ class VoiceComposer extends StatelessWidget {
             children: [
               _buildCircleIconBtn(context, CupertinoIcons.trash, false),
               const SizedBox(width: 24),
-              if (variant == VoiceComposerVariant.defaultState || variant == VoiceComposerVariant.pause)
+              if (isDefault || isPause)
                 _buildCircleIconBtn(context, CupertinoIcons.mic_fill, true, isRed: true)
               else
                 _buildCircleIconBtn(context, CupertinoIcons.pause_fill, true, isRed: true),
@@ -309,20 +336,17 @@ class VoiceComposer extends StatelessWidget {
     );
   }
 
-  Widget _buildPreviewState(BuildContext context) {
+  Widget _buildPreviewCard(BuildContext context) {
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 300),
       padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: context.appSurface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 8)),
         ],
       ),
       child: Column(
@@ -401,6 +425,44 @@ class VoiceComposer extends StatelessWidget {
         border: isSolid ? null : Border.all(color: Colors.grey.shade300),
       ),
       child: Icon(icon, color: iconColor, size: 20),
+    );
+  }
+
+  Widget _buildBottomForm(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 300),
+      decoration: BoxDecoration(
+        color: context.appSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.appDivider.withOpacity(0.5)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: const [
+                IconAction(icon: CupertinoIcons.add_circled),
+                IconAction(icon: CupertinoIcons.mic),
+                IconAction(icon: CupertinoIcons.smiley),
+                IconAction(icon: CupertinoIcons.doc),
+                IconAction(icon: CupertinoIcons.sparkles),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: const BoxDecoration(
+              color: _figmaGrey,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -604,19 +666,26 @@ class PopupAiMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildPopupContainer(
-      context: context,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildMenuItem(context, Icons.chat_bubble, 'Suggest a reply'),
-            _buildMenuItem(context, Icons.summarize, 'Conversation summary'),
-            _buildMenuItem(context, Icons.smart_toy, 'Ask AI Bot'),
-          ],
+    // Logika struktur temen lu dengan tampilan Figma
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      verticalDirection: VerticalDirection.up,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const ChatInputField(variant: ChatInputVariant.aiActive),
+        const SizedBox(height: 8),
+        _buildPopupContainer(
+          context: context,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildMenuItem(context, CupertinoIcons.chat_bubble_text_fill, 'Suggest a reply'),
+              _buildMenuItem(context, CupertinoIcons.doc_text_fill, 'Conversation summary'),
+              _buildMenuItem(context, Icons.smart_toy, 'Ask AI Bot'),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -642,9 +711,15 @@ class AiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isSuggest = title.toLowerCase().contains('suggest');
+
     return Column(
       mainAxisSize: MainAxisSize.min,
+      verticalDirection: VerticalDirection.up, // Logika temen lu
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const ChatInputField(variant: ChatInputVariant.aiActive),
+        const SizedBox(height: 8),
         Container(
           width: double.infinity,
           constraints: const BoxConstraints(maxWidth: 320),
@@ -672,17 +747,32 @@ class AiCard extends StatelessWidget {
               Divider(height: 1, color: context.appDivider.withOpacity(0.5)),
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text(
-                    content,
-                    style: AppTypography.bodyMedium.copyWith(height: 1.5, color: Colors.grey.shade800).adapt(context)
-                ),
+                child: isSuggest ? Column(
+                  children: [
+                    _buildSuggestItem(context, 'Thanks for handling the logistics, Michael. Your effort in securing the group discount for the hotel is much appreciated!'),
+                    const SizedBox(height: 12),
+                    _buildSuggestItem(context, 'Michael, I appreciate you taking care of the logistics and getting us that group discount at the hotel. Thanks a lot!'),
+                    const SizedBox(height: 12),
+                    _buildSuggestItem(context, 'Thank you, Michael, for organizing everything. Your work on getting the group discount for the hotel didn\'t go unnoticed!'),
+                  ],
+                ) : Text(content, style: AppTypography.bodyMedium.copyWith(height: 1.5, color: Colors.grey.shade800).adapt(context)),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 8),
-        const ChatInputField(variant: ChatInputVariant.defaultState),
       ],
+    );
+  }
+
+  Widget _buildSuggestItem(BuildContext context, String text) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(text, style: AppTypography.bodyMedium.copyWith(height: 1.4, color: Colors.grey.shade700).adapt(context)),
     );
   }
 }
@@ -700,22 +790,30 @@ class ConversationStarters extends StatelessWidget {
       'How\'s your day?',
     ];
 
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 320),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 10,
-        children: chips.map((c) => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            color: context.appSurface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          constraints: const BoxConstraints(maxWidth: 320),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 10,
+            children: chips.map((c) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: context.appSurface,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))],
+              ),
+              child: Text(c, style: AppTypography.bodyMedium.copyWith(color: Colors.grey.shade700).adapt(context)),
+            )).toList(),
           ),
-          child: Text(c, style: AppTypography.bodyMedium.copyWith(color: Colors.grey.shade700).adapt(context)),
-        )).toList(),
-      ),
+        ),
+        const SizedBox(height: 16),
+        const ChatInputField(variant: ChatInputVariant.defaultState),
+      ],
     );
   }
 }

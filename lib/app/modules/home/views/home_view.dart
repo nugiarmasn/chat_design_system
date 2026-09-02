@@ -135,6 +135,7 @@ class HomeView extends GetView<HomeController> {
                 Text('Voice Message Composer', style: AppTypography.heading1.adapt(context)),
                 const SizedBox(height: AppSpacing.xl),
                 _buildShowcaseRow(context, const VoiceComposer(variant: VoiceComposerVariant.defaultState), 'Default'),
+                _buildShowcaseRow(context, const VoiceComposer(variant: VoiceComposerVariant.pause), 'Pause'),
                 _buildShowcaseRow(context, const VoiceComposer(variant: VoiceComposerVariant.recording), 'Recording'),
                 _buildShowcaseRow(context, const VoiceComposer(variant: VoiceComposerVariant.preview), 'Preview'),
 
@@ -143,30 +144,17 @@ class HomeView extends GetView<HomeController> {
 
                 Text('AI Features', style: AppTypography.heading1.adapt(context)),
                 const SizedBox(height: AppSpacing.xl),
+                _buildShowcaseRow(context, const PopupAiMenu(), 'AI - Menu'),
                 _buildShowcaseRow(context, const AiCard(
                   title: 'Suggest a reply',
-                  content: 'Thanks for handling the logistics...',
+                  content: '',
                 ), 'AI - Suggest a reply'),
                 _buildShowcaseRow(context, const AiCard(
                   title: 'Conversation summary',
                   content: 'The user expressed interest in a watch listed for sale and confirmed its availability with the seller. They negotiated the price down from \$130 to \$120. After agreeing on the new price, the user asked if they could pick up the watch the same day. The seller responded positively with emojis, and the user confirmed availability after 5 PM. They concluded the conversation with plans to meet soon.',
                 ), 'AI - Conversation summary'),
-                _buildShowcaseRow(context, const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      PopupAiMenu(),
-                      SizedBox(height: 8),
-                      ChatInputField(),
-                    ]
-                ), 'AI - Ask AI Bot'),
-                _buildShowcaseRow(context, const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ConversationStarters(),
-                      SizedBox(height: 8),
-                      ChatInputField(),
-                    ]
-                ), 'Conversation Starter'),
+                _buildShowcaseRow(context, const ChatInputField(variant: ChatInputVariant.aiActive), 'AI - Ask AI Bot'),
+                _buildShowcaseRow(context, const ConversationStarters(), 'Conversation Starter'),
 
                 const Divider(),
                 const SizedBox(height: AppSpacing.xl),
