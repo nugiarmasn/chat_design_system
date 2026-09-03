@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
 
-/// Enum untuk ukuran Avatar (Disesuaikan dengan Figma)
+/// Enum untuk ukuran Avatar (Presisi sesuai Figma)
 enum AvatarSize {
   xs,   // 20px
   sm,   // 24px
@@ -27,7 +27,7 @@ extension AvatarSizeExtension on AvatarSize {
   }
 
   double get badgeSize {
-    // Rasio badge sekitar 28% dari avatar, dengan batas minimal 8px agar tidak hilang
+    // Rasio badge sekitar 28% dari avatar, batas minimal 8px agar tidak hilang
     return (value * 0.28).clamp(8.0, 24.0);
   }
 
@@ -90,11 +90,10 @@ class CustomAvatar extends StatelessWidget {
     );
   }
 
-  /// Membuat bentuk dasar avatar beserta kontennya (gambar/inisial/ikon)
+  /// Membuat bentuk dasar avatar beserta kontennya
   Widget _buildBaseAvatar() {
     Widget content;
 
-    // Menentukan konten: Image > Initials > Default Icon
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       content = Image.network(
         imageUrl!,
@@ -113,12 +112,12 @@ class CustomAvatar extends StatelessWidget {
         return ClipOval(child: content);
       case AvatarShape.rounded:
         return ClipRRect(
-          borderRadius: BorderRadius.circular(size.value * 0.25), // Squirle mulus
+          borderRadius: BorderRadius.circular(size.value * 0.25), // Squircle mulus ala iOS
           child: content,
         );
       case AvatarShape.square:
         return ClipRRect(
-          borderRadius: BorderRadius.circular(size.value * 0.08), // Sedikit tumpul agar elegan
+          borderRadius: BorderRadius.circular(size.value * 0.08), // Tumpul elegan
           child: content,
         );
     }
@@ -126,7 +125,7 @@ class CustomAvatar extends StatelessWidget {
 
   /// Konten fallback jika gambar tidak tersedia
   Widget _buildFallbackContent() {
-    // Warna spesifik Figma untuk latar avatar
+    // Warna ungu spesifik Figma
     const Color figmaSoftPurple = Color(0xFFA5A6F6);
 
     return Container(
@@ -142,7 +141,7 @@ class CustomAvatar extends StatelessWidget {
           color: Colors.white,
           fontWeight: FontWeight.w600,
           fontSize: size.fontSize,
-          height: 1.0, // Memastikan teks benar-benar berada di tengah vertikal
+          height: 1.0, // Center vertikal presisi
         ),
       )
           : Icon(
@@ -156,7 +155,7 @@ class CustomAvatar extends StatelessWidget {
   /// Membuat badge di pojok kanan bawah
   Widget _buildBadge(BuildContext context) {
     final badgeDiameter = size.badgeSize;
-    // Ketebalan border dinamis tapi dibatasi minimal 1.5px dan maksimal 3px
+    // Ketebalan border dibatasi minimal 1.5px
     final borderWidth = (badgeDiameter * 0.15).clamp(1.5, 3.0);
 
     Widget badgeContent = const SizedBox();
@@ -165,13 +164,13 @@ class CustomAvatar extends StatelessWidget {
     // Warna status dari Figma
     switch (badgeType) {
       case AvatarBadgeType.online:
-        badgeColor = const Color(0xFF34C759); // Apple Green
+        badgeColor = const Color(0xFF34C759); // Figma Green
         break;
       case AvatarBadgeType.offline:
-        badgeColor = const Color(0xFFB0B0B0); // Soft Grey
+        badgeColor = const Color(0xFFB0B0B0); // Figma Grey
         break;
       case AvatarBadgeType.notification:
-        badgeColor = const Color(0xFFFF3B30); // Notification Red
+        badgeColor = const Color(0xFFFF3B30); // Figma Red
         badgeContent = Center(
           child: Text(
             notificationCount > 9 ? '9+' : notificationCount.toString(),
@@ -188,16 +187,15 @@ class CustomAvatar extends StatelessWidget {
         break;
     }
 
-    // Matematika posisi badge agar presisi
     double offsetBottom;
     double offsetRight;
 
     if (shape == AvatarShape.circle) {
-      // Jika lingkaran, dorong badge sedikit ke dalam agar duduk manis di kurva garis
+      // Jika lingkaran, badge masuk ke dalam kurva
       offsetBottom = size.value * 0.02;
       offsetRight = size.value * 0.02;
     } else {
-      // Jika kotak/rounded, geser sedikit keluar dari sudut bawah
+      // Jika kotak, badge sedikit menonjol keluar sudut
       offsetBottom = -badgeDiameter * 0.15;
       offsetRight = -badgeDiameter * 0.15;
     }
@@ -212,7 +210,7 @@ class CustomAvatar extends StatelessWidget {
           color: badgeColor,
           shape: BoxShape.circle,
           border: Border.all(
-            color: context.appSurface, // Border menyesuaikan warna background layer (putih/hitam)
+            color: Colors.white, // Border putih pelindung badge
             width: borderWidth,
           ),
         ),
