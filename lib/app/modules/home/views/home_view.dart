@@ -40,9 +40,9 @@ class HomeView extends GetView<HomeController> {
         return const ChatAreaView();
       case 9:
         return const IndexListView();
-      case 10: // Message Area
+      case 10:
         return _buildMessageComposerContent(context);
-      case 11: // Avatars
+      case 11:
         return _buildAvatarsContent(context);
       default:
         return Center(
@@ -62,10 +62,8 @@ class HomeView extends GetView<HomeController> {
   Widget _buildShowcaseRow(BuildContext context, Widget child, String label) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isMobile = constraints.maxWidth < 600; // Deteksi layar sempit
-
+        final isMobile = constraints.maxWidth < 600;
         if (isMobile) {
-          // Tampilan untuk Android/HP (Label di atas, Komponen di bawahnya)
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
             child: Column(
@@ -84,8 +82,6 @@ class HomeView extends GetView<HomeController> {
             ),
           );
         }
-
-        // Tampilan untuk Desktop (Komponen di Kiri, Label di Kanan)
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
           child: Row(
@@ -115,7 +111,6 @@ class HomeView extends GetView<HomeController> {
       color: context.appBackground,
       child: Column(
         children: [
-          // 1. KATALOG LISTVIEW (Bisa di-scroll)
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(AppSpacing.xl),
@@ -128,20 +123,16 @@ class HomeView extends GetView<HomeController> {
                 _buildShowcaseRow(context, const ChatInputField(variant: ChatInputVariant.multiline), 'Multiline'),
                 _buildShowcaseRow(context, const ChatInputField(variant: ChatInputVariant.mentioned), 'Mention'),
                 _buildShowcaseRow(context, const ChatInputField(variant: ChatInputVariant.editMessage), 'Edit Message'),
-
                 const Divider(),
                 const SizedBox(height: AppSpacing.xl),
-
                 Text('Voice Message Composer', style: AppTypography.heading1.adapt(context)),
                 const SizedBox(height: AppSpacing.xl),
                 _buildShowcaseRow(context, const VoiceComposer(variant: VoiceComposerVariant.defaultState), 'Default'),
                 _buildShowcaseRow(context, const VoiceComposer(variant: VoiceComposerVariant.pause), 'Pause'),
                 _buildShowcaseRow(context, const VoiceComposer(variant: VoiceComposerVariant.recording), 'Recording'),
                 _buildShowcaseRow(context, const VoiceComposer(variant: VoiceComposerVariant.preview), 'Preview'),
-
                 const Divider(),
                 const SizedBox(height: AppSpacing.xl),
-
                 Text('AI Features', style: AppTypography.heading1.adapt(context)),
                 const SizedBox(height: AppSpacing.xl),
                 _buildShowcaseRow(context, const PopupAiMenu(), 'AI - Menu'),
@@ -155,10 +146,8 @@ class HomeView extends GetView<HomeController> {
                 ), 'AI - Conversation summary'),
                 _buildShowcaseRow(context, const ChatInputField(variant: ChatInputVariant.aiActive), 'AI - Ask AI Bot'),
                 _buildShowcaseRow(context, const ConversationStarters(), 'Conversation Starter'),
-
                 const Divider(),
                 const SizedBox(height: AppSpacing.xl),
-
                 Text('Popups & Attachments', style: AppTypography.heading1.adapt(context)),
                 const SizedBox(height: AppSpacing.xl),
                 _buildShowcaseRow(context, const PopupAttachment(), 'Attachment'),
@@ -167,8 +156,6 @@ class HomeView extends GetView<HomeController> {
               ],
             ),
           ),
-
-          // 2. INPUT CHAT INTERAKTIF (Dikunci di posisi paling bawah)
           MessageComposer(
             onSend: (text) {
               Get.snackbar('Message Sent', text, snackPosition: SnackPosition.TOP);
@@ -179,8 +166,37 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  // --- KOMPONEN AVATAR & SIDEBAR TETAP SAMA ---
+  // ==========================================
+  // AVATAR SHOWCASE - DENGAN GALERI FIGMA
+  // ==========================================
   Widget _buildAvatarsContent(BuildContext context) {
+    final List<Map<String, String>> figmaUsers = [
+      {'name': 'Andrew Joseph', 'url': 'https://i.pravatar.cc/150?u=andrew'},
+      {'name': 'Brian Michael', 'url': 'https://i.pravatar.cc/150?u=brian'},
+      {'name': 'Charles Dean', 'url': 'https://i.pravatar.cc/150?u=charles'},
+      {'name': 'George Alan', 'url': 'https://i.pravatar.cc/150?u=george'},
+      {'name': 'James Lee', 'url': 'https://i.pravatar.cc/150?u=james'},
+      {'name': 'John Paul', 'url': 'https://i.pravatar.cc/150?u=john'},
+      {'name': 'Michael Scott', 'url': 'https://i.pravatar.cc/150?u=michael'},
+      {'name': 'Muhammed', 'url': 'https://i.pravatar.cc/150?u=muhammed'},
+      {'name': 'Paul David', 'url': 'https://i.pravatar.cc/150?u=paul'},
+      {'name': 'Richard Ray', 'url': 'https://i.pravatar.cc/150?u=richard'},
+      {'name': 'Robert Allen', 'url': 'https://i.pravatar.cc/150?u=robert'},
+      {'name': 'William John', 'url': 'https://i.pravatar.cc/150?u=william'},
+      {'name': 'Emily', 'url': 'https://i.pravatar.cc/150?u=emily'},
+      {'name': 'Jennifer Lynn', 'url': 'https://i.pravatar.cc/150?u=jennifer'},
+      {'name': 'Jessica', 'url': 'https://i.pravatar.cc/150?u=jessica'},
+      {'name': 'Linda Kay', 'url': 'https://i.pravatar.cc/150?u=linda'},
+      {'name': 'Mary Jane', 'url': 'https://i.pravatar.cc/150?u=mary'},
+      {'name': 'Mia Ward', 'url': 'https://i.pravatar.cc/150?u=mia'},
+      {'name': 'Nancy Grace', 'url': 'https://i.pravatar.cc/150?u=nancy'},
+      {'name': 'Safiya Fareena', 'url': 'https://i.pravatar.cc/150?u=safiya'},
+      {'name': 'Sarah Beth', 'url': 'https://i.pravatar.cc/150?u=sarah'},
+      {'name': 'Sophia Perez', 'url': 'https://i.pravatar.cc/150?u=sophia'},
+      {'name': 'Susan Marie', 'url': 'https://i.pravatar.cc/150?u=susan'},
+      {'name': 'Tessa', 'url': 'https://i.pravatar.cc/150?u=tessa'},
+    ];
+
     return Container(
       color: context.appBackground,
       child: SingleChildScrollView(
@@ -188,21 +204,60 @@ class HomeView extends GetView<HomeController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Initials Avatar', style: AppTypography.heading1.adapt(context)),
+            // --- BASE IMAGE (Figma) ---
+            Text('Base_Image', style: AppTypography.heading1.adapt(context)),
             const SizedBox(height: AppSpacing.lg),
-            _buildAvatarGrid(initials: 'SF', badgeType: AvatarBadgeType.online),
+            Wrap(
+              spacing: 24,
+              runSpacing: 24,
+              children: figmaUsers.map((user) => SizedBox(
+                width: 64,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CustomAvatar(
+                      imageUrl: user['url'],
+                      size: AvatarSize.xl,
+                      shape: AvatarShape.square,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      user['name']!,
+                      style: AppTypography.caption.copyWith(
+                        color: context.appTextSecondary,
+                        fontSize: 10,
+                      ).adapt(context),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              )).toList(),
+            ),
+
             const SizedBox(height: AppSpacing.xxl),
-            Text('Icon Avatar', style: AppTypography.heading1.adapt(context)),
-            const SizedBox(height: AppSpacing.lg),
-            _buildAvatarGrid(defaultIcon: Icons.person, badgeType: AvatarBadgeType.offline),
+            Divider(color: context.appDivider),
             const SizedBox(height: AppSpacing.xxl),
-            Text('Image Avatar', style: AppTypography.heading1.adapt(context)),
+
+            // --- IMAGE AVATAR (SIZE & SHAPE TEST) ---
+            Text('Image Avatar (Testing Sizes & Shapes)', style: AppTypography.heading1.adapt(context)),
             const SizedBox(height: AppSpacing.lg),
             _buildAvatarGrid(
               imageUrl: 'https://i.pravatar.cc/150?u=scott',
               badgeType: AvatarBadgeType.notification,
               notificationCount: 3,
             ),
+
+            const SizedBox(height: AppSpacing.xxl),
+            Text('Initials Avatar', style: AppTypography.heading1.adapt(context)),
+            const SizedBox(height: AppSpacing.lg),
+            _buildAvatarGrid(initials: 'SF', badgeType: AvatarBadgeType.online),
+
+            const SizedBox(height: AppSpacing.xxl),
+            Text('Icon Avatar', style: AppTypography.heading1.adapt(context)),
+            const SizedBox(height: AppSpacing.lg),
+            _buildAvatarGrid(defaultIcon: Icons.person, badgeType: AvatarBadgeType.offline),
           ],
         ),
       ),
@@ -224,11 +279,35 @@ class HomeView extends GetView<HomeController> {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CustomAvatar(size: size, shape: AvatarShape.circle, initials: initials, defaultIcon: defaultIcon, imageUrl: imageUrl, badgeType: badgeType, notificationCount: notificationCount),
+            CustomAvatar(
+              size: size,
+              shape: AvatarShape.circle,
+              initials: initials,
+              defaultIcon: defaultIcon,
+              imageUrl: imageUrl,
+              badgeType: badgeType,
+              notificationCount: notificationCount,
+            ),
             const SizedBox(width: AppSpacing.md),
-            CustomAvatar(size: size, shape: AvatarShape.rounded, initials: initials, defaultIcon: defaultIcon, imageUrl: imageUrl, badgeType: badgeType, notificationCount: notificationCount),
+            CustomAvatar(
+              size: size,
+              shape: AvatarShape.rounded,
+              initials: initials,
+              defaultIcon: defaultIcon,
+              imageUrl: imageUrl,
+              badgeType: badgeType,
+              notificationCount: notificationCount,
+            ),
             const SizedBox(width: AppSpacing.md),
-            CustomAvatar(size: size, shape: AvatarShape.square, initials: initials, defaultIcon: defaultIcon, imageUrl: imageUrl, badgeType: badgeType, notificationCount: notificationCount),
+            CustomAvatar(
+              size: size,
+              shape: AvatarShape.square,
+              initials: initials,
+              defaultIcon: defaultIcon,
+              imageUrl: imageUrl,
+              badgeType: badgeType,
+              notificationCount: notificationCount,
+            ),
           ],
         );
       }).toList(),
