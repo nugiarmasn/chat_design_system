@@ -41,16 +41,17 @@ class ChatInputField extends StatelessWidget {
             borderRadius: BorderRadius.circular(16), // Rounded seperti Figma
             border: Border.all(
               color: variant == ChatInputVariant.focus || variant == ChatInputVariant.typing
-                  ? _figmaPurple.withOpacity(0.3)
-                  : context.appDivider.withOpacity(0.5),
+                  ? _figmaPurple.withValues(alpha: 0.3)
+                  : context.appDivider.withValues(alpha: 0.5),
               width: 1,
             ),
             boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 15,
-                offset: const Offset(0, 4),
-              ),
+              if (variant == ChatInputVariant.focus || variant == ChatInputVariant.typing)
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 15,
+                  offset: const Offset(0, 4),
+                ),
             ],
           ),
           child: Column(
@@ -59,7 +60,7 @@ class ChatInputField extends StatelessWidget {
             children: [
               if (variant == ChatInputVariant.editMessage) ...[
                 _buildEditHeader(context),
-                Divider(height: 1, color: context.appDivider.withOpacity(0.5)),
+                Divider(height: 1, color: context.appDivider.withValues(alpha: 0.5)),
               ],
               _buildInputArea(context),
               _buildBottomActions(context),
@@ -72,51 +73,56 @@ class ChatInputField extends StatelessWidget {
 
   Widget _buildMentionPopup(BuildContext context) {
     final users = [
-      {'name': 'Alex Mason', 'avatar': 'https://i.pravatar.cc/150?u=alex'},
-      {'name': 'Andrew Joseph', 'avatar': 'https://i.pravatar.cc/150?u=andrew'},
+      {'name': 'Alex Mason', 'avatar': 'https://i.pravatar.cc/150?u=alex', 'selected': false},
+      {'name': 'Andrew Joseph', 'avatar': 'https://i.pravatar.cc/150?u=andrew', 'selected': false},
       {'name': 'Avery Quinn', 'avatar': 'https://i.pravatar.cc/150?u=avery', 'selected': true},
-      {'name': 'Brian Michael', 'avatar': 'https://i.pravatar.cc/150?u=brian'},
-      {'name': 'Cameron Lee', 'avatar': 'https://i.pravatar.cc/150?u=cameron'},
-      {'name': 'Charles Dean', 'avatar': 'https://i.pravatar.cc/150?u=charles'},
     ];
 
-    return Container(
-      decoration: BoxDecoration(
-        color: context.appSurface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: users.map((u) {
-          final isSelected = u['selected'] == true;
-          return Container(
-            color: isSelected ? context.appDivider.withOpacity(0.3) : Colors.transparent,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
-            child: Row(
-              children: [
-                CustomAvatar(
-                  imageUrl: u['avatar'] as String,
-                  size: AvatarSize.sm,
-                  shape: AvatarShape.circle,
+    // MENGGABUNGKAN: Desain Figma rekan Anda + Arsitektur ListView (Performa)
+    return Material(
+      color: context.appSurface,
+      borderRadius: BorderRadius.circular(16),
+      elevation: 8,
+      shadowColor: Colors.black.withValues(alpha: 0.06),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 200),
+        child: ListView.builder(
+          shrinkWrap: true,
+          padding: EdgeInsets.zero,
+          itemCount: users.length,
+          itemBuilder: (context, index) {
+            final u = users[index];
+            final isSelected = u['selected'] == true;
+            return InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {},
+              child: Container(
+                color: isSelected ? context.appDivider.withValues(alpha: 0.3) : Colors.transparent,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
+                child: Row(
+                  children: [
+                    CustomAvatar(
+                      imageUrl: u['avatar'] as String,
+                      size: AvatarSize.sm,
+                      shape: AvatarShape.circle,
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        u['name'] as String,
+                        style: AppTypography.bodyMedium.copyWith(
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        ).adapt(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.md),
-                Text(
-                  u['name'] as String,
-                  style: AppTypography.bodyMedium.copyWith(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  ).adapt(context),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -127,10 +133,7 @@ class ChatInputField extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: context.isDark ? Colors.white10 : const Color(0xFFF8F9FA),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,35 +155,32 @@ class ChatInputField extends StatelessWidget {
     } else if (variant == ChatInputVariant.multiline) {
       text = 'Hey! Just finished the draft for the project.\nNeed your feedback by tomorrow if possible.|';
       hint = '';
-    } else if (variant == ChatInputVariant.mentioned) {
-      text = '';
-      hint = '';
     }
 
     return Padding(
       padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.md, top: AppSpacing.md, bottom: 8),
       child: variant == ChatInputVariant.mentioned
           ? RichText(
-        text: TextSpan(
-          style: AppTypography.body.adapt(context),
-          children: [
-            TextSpan(text: '@john ', style: TextStyle(color: _figmaPurple, fontWeight: FontWeight.w500)),
-            TextSpan(text: '@a|'),
-          ],
-        ),
-      )
+              text: TextSpan(
+                style: AppTypography.body.adapt(context),
+                children: [
+                  const TextSpan(text: '@john ', style: TextStyle(color: _figmaPurple, fontWeight: FontWeight.w500)),
+                  TextSpan(text: '@a|', style: AppTypography.body.adapt(context)),
+                ],
+              ),
+            )
           : Text(
-        text.isEmpty ? hint : text,
-        style: text.isEmpty
-            ? AppTypography.bodySecondary.copyWith(color: Colors.grey.shade400).adapt(context)
-            : AppTypography.body.copyWith(fontWeight: FontWeight.w400).adapt(context),
-      ),
+              text.isEmpty ? hint : text,
+              style: text.isEmpty
+                  ? AppTypography.bodySecondary.copyWith(color: Colors.grey.shade400).adapt(context)
+                  : AppTypography.body.copyWith(fontWeight: FontWeight.w400).adapt(context),
+            ),
     );
   }
 
   Widget _buildBottomActions(BuildContext context) {
     bool isActive = variant == ChatInputVariant.typing || variant == ChatInputVariant.multiline || variant == ChatInputVariant.mentioned || variant == ChatInputVariant.editMessage;
-    bool isAiActive = variant == ChatInputVariant.aiActive; // Tambahan dari temen lu
+    bool isAiActive = variant == ChatInputVariant.aiActive;
 
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 12, bottom: 8),
@@ -197,21 +197,25 @@ class ChatInputField extends StatelessWidget {
                 const IconAction(icon: CupertinoIcons.doc),
                 IconAction(
                   icon: CupertinoIcons.sparkles,
-                  color: isAiActive ? _figmaPurple : null, // Aksen Figma digabung logika temen lu
+                  color: isAiActive ? _figmaPurple : null,
                 ),
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: isActive ? _figmaPurple : _figmaGrey,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              variant == ChatInputVariant.editMessage ? Icons.check : Icons.send_rounded,
-              color: Colors.white,
-              size: 18,
+          InkWell(
+            onTap: isActive ? () {} : null,
+            customBorder: const CircleBorder(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isActive ? _figmaPurple : _figmaGrey,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                variant == ChatInputVariant.editMessage ? Icons.check : Icons.send_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
             ),
           ),
         ],
@@ -222,15 +226,19 @@ class ChatInputField extends StatelessWidget {
 
 class IconAction extends StatelessWidget {
   final IconData icon;
-  final Color? color; // Tambahan properti warna biar dinamis
+  final Color? color;
 
   const IconAction({super.key, required this.icon, this.color});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6.0),
-      child: Icon(icon, color: color ?? Colors.grey.shade500, size: 22),
+    // MENGGABUNGKAN: IconButton (aksesibilitas touch target > 40dp) + Parameter warna rekan Anda
+    return IconButton(
+      icon: Icon(icon, color: color ?? Colors.grey.shade500, size: 22),
+      onPressed: () {},
+      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+      padding: EdgeInsets.zero,
+      splashRadius: 20,
     );
   }
 }
@@ -239,24 +247,14 @@ class IconAction extends StatelessWidget {
 // VOICE COMPOSER VARIANTS
 // ==========================================
 
-enum VoiceComposerVariant {
-  defaultState,
-  pause,
-  recording,
-  preview,
-}
+enum VoiceComposerVariant { defaultState, pause, recording, preview }
 
 class VoiceComposer extends StatelessWidget {
   final VoiceComposerVariant variant;
-
-  const VoiceComposer({
-    super.key,
-    this.variant = VoiceComposerVariant.defaultState,
-  });
+  const VoiceComposer({super.key, this.variant = VoiceComposerVariant.defaultState});
 
   @override
   Widget build(BuildContext context) {
-    // Logika struktur layout temen lu (ada form chat di bawah Voice Card)
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,9 +267,7 @@ class VoiceComposer extends StatelessWidget {
   }
 
   Widget _buildVoiceCard(BuildContext context) {
-    if (variant == VoiceComposerVariant.preview) {
-      return _buildPreviewCard(context);
-    }
+    if (variant == VoiceComposerVariant.preview) return _buildPreviewCard(context);
 
     final bool isDefault = variant == VoiceComposerVariant.defaultState;
     final bool isPause = variant == VoiceComposerVariant.pause;
@@ -285,11 +281,7 @@ class VoiceComposer extends StatelessWidget {
         color: context.appSurface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 20, offset: const Offset(0, 8)),
         ],
       ),
       child: Column(
@@ -302,19 +294,18 @@ class VoiceComposer extends StatelessWidget {
               color: isDefault ? _figmaGrey : _figmaPurple,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-                CupertinoIcons.mic_fill,
-                color: Colors.white,
-                size: 36
-            ),
+            child: const Icon(CupertinoIcons.mic_fill, color: Colors.white, size: 36),
           ),
           if (!isDefault) ...[
             const SizedBox(height: 16),
             Text(
               '00:00:10',
-              style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600).adapt(context),
+              style: AppTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+                fontFeatures: const [FontFeature.tabularFigures()], // Hindari angka bergoyang
+              ).adapt(context),
             ),
-          ] else ... [
+          ] else ...[
             const SizedBox(height: 36),
           ],
           const SizedBox(height: 24),
@@ -346,7 +337,7 @@ class VoiceComposer extends StatelessWidget {
         color: context.appSurface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 8)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 20, offset: const Offset(0, 8)),
         ],
       ),
       child: Column(
@@ -368,7 +359,10 @@ class VoiceComposer extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(child: _buildAudioWaveform()),
                 const SizedBox(width: 12),
-                const Text('00:00/00:32', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500)),
+                const Text(
+                  '00:00/00:32',
+                  style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500, fontFeatures: [FontFeature.tabularFigures()]),
+                ),
               ],
             ),
           ),
@@ -378,14 +372,18 @@ class VoiceComposer extends StatelessWidget {
             children: [
               _buildCircleIconBtn(context, CupertinoIcons.trash, false),
               const SizedBox(width: 24),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10, offset: const Offset(0, 4))],
+              InkWell(
+                onTap: () {},
+                customBorder: const CircleBorder(),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 10, offset: const Offset(0, 4))],
+                  ),
+                  child: const Icon(Icons.send_rounded, color: _figmaPurple, size: 24),
                 ),
-                child: const Icon(Icons.send_rounded, color: _figmaPurple, size: 24),
               ),
               const SizedBox(width: 24),
               _buildCircleIconBtn(context, CupertinoIcons.mic, false),
@@ -402,12 +400,12 @@ class VoiceComposer extends StatelessWidget {
       children: List.generate(15, (index) {
         final heights = [4, 8, 12, 6, 16, 10, 4, 18, 14, 8, 20, 10, 6, 12, 8];
         return Container(
-            width: 2.5,
-            height: heights[index].toDouble(),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(2),
-            )
+          width: 2.5,
+          height: heights[index].toDouble(),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.8),
+            borderRadius: BorderRadius.circular(2),
+          ),
         );
       }),
     );
@@ -415,16 +413,20 @@ class VoiceComposer extends StatelessWidget {
 
   Widget _buildCircleIconBtn(BuildContext context, IconData icon, bool isSolid, {bool isRed = false}) {
     Color iconColor = isRed ? AppColors.error : Colors.grey.shade600;
-    Color bgColor = isRed ? AppColors.error.withOpacity(0.1) : Colors.transparent;
+    Color bgColor = isRed ? AppColors.error.withValues(alpha: 0.1) : Colors.transparent;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: bgColor,
-        shape: BoxShape.circle,
-        border: isSolid ? null : Border.all(color: Colors.grey.shade300),
+    return InkWell(
+      onTap: () {},
+      customBorder: const CircleBorder(),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: bgColor,
+          shape: BoxShape.circle,
+          border: isSolid ? null : Border.all(color: Colors.grey.shade300),
+        ),
+        child: Icon(icon, color: iconColor, size: 20),
       ),
-      child: Icon(icon, color: iconColor, size: 20),
     );
   }
 
@@ -435,7 +437,7 @@ class VoiceComposer extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.appSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.appDivider.withOpacity(0.5)),
+        border: Border.all(color: context.appDivider.withValues(alpha: 0.5)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
@@ -455,10 +457,7 @@ class VoiceComposer extends StatelessWidget {
           ),
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: _figmaGrey,
-              shape: BoxShape.circle,
-            ),
+            decoration: const BoxDecoration(color: _figmaGrey, shape: BoxShape.circle),
             child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
           ),
         ],
@@ -500,15 +499,14 @@ class PopupAttachment extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        // Bottom Action Preview
         Container(
           width: double.infinity,
-          constraints: const BoxConstraints(maxWidth: 280),
+          constraints: const BoxConstraints(maxWidth: 320),
           decoration: BoxDecoration(
             color: context.appSurface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2))],
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Row(
@@ -516,11 +514,15 @@ class PopupAttachment extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(color: _figmaPurple, shape: BoxShape.circle),
-                    child: const Icon(Icons.close, color: Colors.white, size: 16),
+                  InkWell(
+                    onTap: () {},
+                    customBorder: const CircleBorder(),
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(color: _figmaPurple, shape: BoxShape.circle),
+                      child: const Icon(Icons.close, color: Colors.white, size: 16),
+                    ),
                   ),
                   const IconAction(icon: CupertinoIcons.mic),
                   const IconAction(icon: CupertinoIcons.smiley),
@@ -541,14 +543,22 @@ class PopupAttachment extends StatelessWidget {
   }
 
   Widget _buildMenuItem(BuildContext context, IconData icon, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      child: Row(
-        children: [
-          Icon(icon, color: _figmaPurple, size: 22),
-          const SizedBox(width: 16),
-          Text(label, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500).adapt(context)),
-        ],
+    return InkWell(
+      onTap: () {},
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, color: _figmaPurple, size: 22),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                label, 
+                style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500).adapt(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -559,28 +569,44 @@ class PopupEmoji extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // MENGGABUNGKAN: GridView untuk performa, Figma untuk visual
     return _buildPopupContainer(
       context: context,
+      height: 320,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 16, bottom: 8),
-            child: Center(child: Text('Smiley & People', style: AppTypography.caption.copyWith(color: Colors.grey.shade500))),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: List.generate(35, (index) => const Text('😀', style: TextStyle(fontSize: 22))),
+            child: Center(
+              child: Text(
+                'Smiley & People', 
+                style: AppTypography.caption.copyWith(color: Colors.grey.shade500),
+              ),
             ),
           ),
-          const SizedBox(height: 16),
-          Divider(height: 1, color: context.appDivider.withOpacity(0.5)),
+          Expanded(
+            child: GridView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 7,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+              ),
+              itemCount: 70, 
+              itemBuilder: (context, index) {
+                return InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () {},
+                  child: const Center(child: Text('😀', style: TextStyle(fontSize: 22))),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          Divider(height: 1, color: context.appDivider.withValues(alpha: 0.5)),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -607,12 +633,12 @@ class PopupSticker extends StatelessWidget {
   Widget build(BuildContext context) {
     return _buildPopupContainer(
       context: context,
+      height: 320,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -625,29 +651,38 @@ class PopupSticker extends StatelessWidget {
               ],
             ),
           ),
-          Divider(height: 1, color: context.appDivider.withOpacity(0.5)),
+          Divider(height: 1, color: context.appDivider.withValues(alpha: 0.5)),
           Padding(
             padding: const EdgeInsets.only(left: 16, top: 12, bottom: 12),
-            child: Text('Recent Stickers', style: AppTypography.caption.copyWith(color: Colors.grey.shade500)),
+            child: Text(
+              'Recent Stickers', 
+              style: AppTypography.caption.copyWith(color: Colors.grey.shade500),
+            ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: List.generate(6, (index) {
-                return Container(
-                  width: 65,
-                  height: 65,
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade100.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Icon(Icons.face_retouching_natural, color: Colors.orange.shade400, size: 40),
+          Expanded(
+            child: GridView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4, 
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+              ),
+              itemCount: 16,
+              itemBuilder: (context, index) {
+                return InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {},
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade100.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Icon(Icons.face_retouching_natural, color: Colors.orange.shade400, size: 40),
+                    ),
                   ),
                 );
-              }),
+              },
             ),
           ),
           const SizedBox(height: 16),
@@ -666,7 +701,6 @@ class PopupAiMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Logika struktur temen lu dengan tampilan Figma
     return Column(
       mainAxisSize: MainAxisSize.min,
       verticalDirection: VerticalDirection.up,
@@ -690,14 +724,22 @@ class PopupAiMenu extends StatelessWidget {
   }
 
   Widget _buildMenuItem(BuildContext context, IconData icon, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Icon(icon, color: _figmaPurple, size: 20),
-          const SizedBox(width: 12),
-          Text(label, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500).adapt(context)),
-        ],
+    return InkWell(
+      onTap: () {},
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, color: _figmaPurple, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label, 
+                style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500).adapt(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -715,7 +757,7 @@ class AiCard extends StatelessWidget {
 
     return Column(
       mainAxisSize: MainAxisSize.min,
-      verticalDirection: VerticalDirection.up, // Logika temen lu
+      verticalDirection: VerticalDirection.up,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const ChatInputField(variant: ChatInputVariant.aiActive),
@@ -727,7 +769,7 @@ class AiCard extends StatelessWidget {
             color: context.appSurface,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 4)),
+              BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 15, offset: const Offset(0, 4)),
             ],
             border: Border.all(color: Colors.grey.shade200),
           ),
@@ -740,11 +782,16 @@ class AiCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(title, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold).adapt(context)),
-                    Icon(CupertinoIcons.xmark, size: 16, color: Colors.grey.shade500),
+                    IconButton(
+                      icon: Icon(CupertinoIcons.xmark, size: 16, color: Colors.grey.shade500),
+                      onPressed: () {},
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      padding: EdgeInsets.zero,
+                    ),
                   ],
                 ),
               ),
-              Divider(height: 1, color: context.appDivider.withOpacity(0.5)),
+              Divider(height: 1, color: context.appDivider.withValues(alpha: 0.5)),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: isSuggest ? Column(
@@ -765,14 +812,18 @@ class AiCard extends StatelessWidget {
   }
 
   Widget _buildSuggestItem(BuildContext context, String text) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade200),
-        borderRadius: BorderRadius.circular(12),
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () {},
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(text, style: AppTypography.bodyMedium.copyWith(height: 1.4, color: Colors.grey.shade700).adapt(context)),
       ),
-      child: Text(text, style: AppTypography.bodyMedium.copyWith(height: 1.4, color: Colors.grey.shade700).adapt(context)),
     );
   }
 }
@@ -799,15 +850,19 @@ class ConversationStarters extends StatelessWidget {
           child: Wrap(
             spacing: 8,
             runSpacing: 10,
-            children: chips.map((c) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: context.appSurface,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.grey.shade200),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4, offset: const Offset(0, 2))],
+            children: chips.map((c) => InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: () {},
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: context.appSurface,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.grey.shade200),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 4, offset: const Offset(0, 2))],
+                ),
+                child: Text(c, style: AppTypography.bodyMedium.copyWith(color: Colors.grey.shade700).adapt(context)),
               ),
-              child: Text(c, style: AppTypography.bodyMedium.copyWith(color: Colors.grey.shade700).adapt(context)),
             )).toList(),
           ),
         ),
@@ -819,18 +874,28 @@ class ConversationStarters extends StatelessWidget {
 }
 
 // Utility wrapper for popups
-Widget _buildPopupContainer({required BuildContext context, required Widget child}) {
-  return Container(
-    width: double.infinity,
-    constraints: const BoxConstraints(maxWidth: 280),
-    decoration: BoxDecoration(
-      color: context.appSurface,
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: [
-        BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, 8)),
-      ],
-      border: Border.all(color: Colors.grey.shade100),
+Widget _buildPopupContainer({
+  required BuildContext context, 
+  required Widget child,
+  double? height,
+}) {
+  return Material(
+    color: context.appSurface,
+    borderRadius: BorderRadius.circular(20),
+    elevation: 8,
+    shadowColor: Colors.black.withValues(alpha: 0.06),
+    child: Container(
+      width: double.infinity,
+      height: height,
+      constraints: const BoxConstraints(maxWidth: 320),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(19), 
+        child: child,
+      ),
     ),
-    child: child,
   );
 }
