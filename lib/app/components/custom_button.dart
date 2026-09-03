@@ -38,7 +38,6 @@ class CustomButton extends StatelessWidget {
         fg = AppColors.primary;
         break;
       case ButtonType.primary:
-      default:
         bg = AppColors.primary;
         fg = Colors.white;
         break;
@@ -64,10 +63,7 @@ class CustomButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (icon != null) ...[
-            Icon(icon, size: 18),
-            const SizedBox(width: 8),
-          ],
+          if (icon != null) ...[Icon(icon, size: 18), const SizedBox(width: 8)],
           Text(
             label,
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
