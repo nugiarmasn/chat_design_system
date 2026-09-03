@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
 
-// Import Pages (Standard Flutter)
 import '../../../pages/bars_navigation/nav_bars_page.dart';
 import '../../../pages/bars_navigation/bottom_and_tabs_page.dart';
 import '../../../pages/bars_navigation/search_bars_page.dart';
 
-// Import Modules (GetX Views)
 import '../../text_fields/views/text_fields_view.dart';
 import '../../buttons/views/buttons_view.dart';
 import '../../toggles/views/toggles_view.dart';
@@ -16,7 +14,6 @@ import '../../index_list/views/index_list_view.dart';
 import '../../popovers_dialogs/views/popovers_dialogs_view.dart';
 import '../../snackbars_bottom_sheets/views/snackbars_bottom_sheets_view.dart';
 
-// Import Core & Components
 import '../../../core/theme/app_theme.dart';
 import '../../../widgets/custom_avatar.dart';
 import '../../../widgets/chat_input_field.dart';
@@ -25,8 +22,7 @@ import '../../../widgets/message_composer.dart';
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
-  static const double _mobileBreakpoint =
-      768; // Standar breakpoint tablet/mobile modern
+  static const double _mobileBreakpoint = 768; 
 
   Widget _buildContent(BuildContext context, int index, String menuTitle) {
     switch (index) {
@@ -43,9 +39,9 @@ class HomeView extends GetView<HomeController> {
       case 5:
         return const SearchBarsPage();
       case 6:
-        return const PopoversDialogsView(); // Dikembalikan
+        return const PopoversDialogsView();
       case 7:
-        return const SnackbarsBottomSheetsView(); // Dikembalikan
+        return const SnackbarsBottomSheetsView();
       case 8:
         return const ChatAreaView();
       case 9:
@@ -124,9 +120,7 @@ class HomeView extends GetView<HomeController> {
           Expanded(
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 800,
-                ), // Mencegah stretching ekstrem di Desktop
+                constraints: const BoxConstraints(maxWidth: 800),
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.xl),
                   children: [
@@ -137,9 +131,7 @@ class HomeView extends GetView<HomeController> {
                     const SizedBox(height: AppSpacing.xl),
                     _buildShowcaseRow(
                       context,
-                      const ChatInputField(
-                        variant: ChatInputVariant.defaultState,
-                      ),
+                      const ChatInputField(variant: ChatInputVariant.defaultState),
                       'Default',
                     ),
                     _buildShowcaseRow(
@@ -164,9 +156,7 @@ class HomeView extends GetView<HomeController> {
                     ),
                     _buildShowcaseRow(
                       context,
-                      const ChatInputField(
-                        variant: ChatInputVariant.editMessage,
-                      ),
+                      const ChatInputField(variant: ChatInputVariant.editMessage),
                       'Edit Message',
                     ),
 
@@ -179,23 +169,22 @@ class HomeView extends GetView<HomeController> {
                     const SizedBox(height: AppSpacing.xl),
                     _buildShowcaseRow(
                       context,
-                      const VoiceComposer(
-                        variant: VoiceComposerVariant.defaultState,
-                      ),
+                      const VoiceComposer(variant: VoiceComposerVariant.defaultState),
                       'Default',
                     ),
                     _buildShowcaseRow(
                       context,
-                      const VoiceComposer(
-                        variant: VoiceComposerVariant.recording,
-                      ),
+                      const VoiceComposer(variant: VoiceComposerVariant.pause),
+                      'Pause',
+                    ),
+                    _buildShowcaseRow(
+                      context,
+                      const VoiceComposer(variant: VoiceComposerVariant.recording),
                       'Recording',
                     ),
                     _buildShowcaseRow(
                       context,
-                      const VoiceComposer(
-                        variant: VoiceComposerVariant.preview,
-                      ),
+                      const VoiceComposer(variant: VoiceComposerVariant.preview),
                       'Preview',
                     ),
 
@@ -206,6 +195,11 @@ class HomeView extends GetView<HomeController> {
                       style: AppTypography.heading1.adapt(context),
                     ),
                     const SizedBox(height: AppSpacing.xl),
+                    _buildShowcaseRow(
+                      context,
+                      const PopupAiMenu(),
+                      'AI - Menu',
+                    ),
                     _buildShowcaseRow(
                       context,
                       const AiCard(

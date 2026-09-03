@@ -327,11 +327,9 @@ class ComponentLibraryView extends GetView<ComponentLibraryController> {
                   'AI - Suggest a reply', 
                   const AiCard(
                     title: 'Suggest a reply',
-                    content: 'Thanks for handling the logistics, Michael. Your effort in securing the group discount for the hotel is much appreciated!\n\nMichael, I appreciate you taking care of the logistics and getting us that group discount at the hotel. Thanks a lot!\n\nThank you, Michael, for organizing everything. Your work on getting the group discount for the hotel didn\'t go unnoticed!',
+                    content: '',
                   ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                const ChatInputField(variant: ChatInputVariant.defaultState),
                 const SizedBox(height: AppSpacing.xl),
                 _buildLabeledItem(
                   'AI - Conversation summary', 
@@ -340,14 +338,10 @@ class ComponentLibraryView extends GetView<ComponentLibraryController> {
                     content: 'The user expressed interest in a watch listed for sale and confirmed its availability with the seller. They negotiated the price down from \$130 to \$120. After agreeing on the new price, the user asked if they could pick up the watch the same day. The seller responded positively with emojis, and the user confirmed availability after 5 PM. They concluded the conversation with plans to meet soon.',
                   ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                const ChatInputField(variant: ChatInputVariant.defaultState),
                 const SizedBox(height: AppSpacing.xl),
-                _buildLabeledItem('AI - Ask AI Bot', const ChatInputField(variant: ChatInputVariant.defaultState)),
+                _buildLabeledItem('AI - Ask AI Bot', const ChatInputField(variant: ChatInputVariant.aiActive)),
                 const SizedBox(height: AppSpacing.xl),
                 _buildLabeledItem('Conversation Starter', const ConversationStarters()),
-                const SizedBox(height: AppSpacing.sm),
-                const ChatInputField(variant: ChatInputVariant.defaultState),
               ],
             );
 
